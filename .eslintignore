@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+coverage/
+*.tsbuildinfo
+
+# Configuration files
+*.config.js
+*.config.ts
+.eslintrc.js
+
+# Task Master
+.taskmaster/
+
+# Test fixtures
+__fixtures__/
+__mocks__/

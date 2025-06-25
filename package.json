@@ -19,7 +19,9 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist coverage",
     "prepublishOnly": "npm run clean && npm run build"

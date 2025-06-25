@@ -1,10 +1,12 @@
 ---
-description: Guidelines for creating and maintaining Trae rules to ensure consistency and effectiveness.
+description:
+  Guidelines for creating and maintaining Trae rules to ensure consistency and effectiveness.
 globs: .trae/rules/*.md
 alwaysApply: true
 ---
 
 - **Required Rule Structure:**
+
   ```markdown
   ---
   description: Clear, one-line description of what the rule enforces
@@ -24,10 +26,11 @@ alwaysApply: true
 
 - **Code Examples:**
   - Use language-specific code blocks
+
   ```typescript
   // ✅ DO: Show good examples
   const goodExample = true;
-  
+
   // ❌ DON'T: Show anti-patterns
   const badExample = false;
   ```
@@ -50,4 +53,4 @@ alwaysApply: true
   - Keep descriptions concise
   - Include both DO and DON'T examples
   - Reference actual code over theoretical examples
-  - Use consistent formatting across rules 
+  - Use consistent formatting across rules

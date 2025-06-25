@@ -13,7 +13,7 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "removeComments": true,
     "noEmit": true,
-    
+
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -22,7 +22,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "exactOptionalPropertyTypes": true,
-    
+
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
@@ -43,5 +43,11 @@
     "isolatedModules": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "coverage", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }
