@@ -28,7 +28,8 @@
       "Bash(npm run test:coverage:*)",
       "Bash(npx husky init:*)",
       "Bash(chmod:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(node .taskmaster/scripts/manage-tasks.js update 2.5 --status done --details \"Successfully implemented comprehensive Zod validation system for all TypeScript interfaces. Created validation schemas for Component, Contract, Environment, Capability, and all nested structures. Implemented both throwing and safe validation functions with custom ValidationError class and formatted error messages. Added comprehensive test suite achieving 96.43% coverage. Fixed TypeScript build issues with recursive schema definitions using z.lazy() and proper type annotations. System now provides runtime validation for all interfaces with detailed error reporting.\")"
     ],
     "deny": []
   }

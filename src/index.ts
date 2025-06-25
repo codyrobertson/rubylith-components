@@ -5,6 +5,7 @@
 
 // Core exports
 export * from './types';
+export * from './validation';
 export * from './contracts';
 export * from './registry';
 export * from './adapters';
