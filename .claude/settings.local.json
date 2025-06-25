@@ -16,7 +16,16 @@
       "Bash(npm run build:*)",
       "Bash(npm run lint)",
       "Bash(rm:*)",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Bash(npm test)",
+      "Bash(mv:*)",
+      "Bash(npm test:*)",
+      "Bash(npx taskmaster:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(task-master set-status:*)",
+      "Bash(task-master:*)",
+      "Bash(npm run test:coverage:*)"
     ],
     "deny": []
   }
