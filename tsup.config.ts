@@ -5,6 +5,7 @@ export default defineConfig((options) => ({
     index: 'src/index.ts',
     types: 'src/types/index.ts',
     validation: 'src/validation/index.ts',
+    compatibility: 'src/compatibility/index.ts',
     contracts: 'src/contracts/index.ts',
     registry: 'src/registry/index.ts',
     adapters: 'src/adapters/index.ts',
