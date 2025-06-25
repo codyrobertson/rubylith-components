@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Ultra-strict pre-commit validation
+echo "🔍 Running ultra-strict pre-commit validation..."
+
+# Run lint-staged for staged files
+npx lint-staged
+
+# Additional ultra-strict checks
+echo "🔧 Running TypeScript strict compilation..."
+npm run typecheck
+
+echo "🧪 Running full test suite..."
+npm run test:coverage
+
+echo "🏗️  Verifying build integrity..."
+npm run build
+
+echo "✅ All ultra-strict validations passed! Commit is cash money! 💰"

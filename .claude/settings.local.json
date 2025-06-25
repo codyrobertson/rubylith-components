@@ -25,7 +25,9 @@
       "Bash(ls:*)",
       "Bash(task-master set-status:*)",
       "Bash(task-master:*)",
-      "Bash(npm run test:coverage:*)"
+      "Bash(npm run test:coverage:*)",
+      "Bash(npx husky init:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

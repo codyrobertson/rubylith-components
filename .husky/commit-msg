@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Ultra-strict commit message validation
+echo "🔍 Validating commit message format..."
+
+# Read the commit message
+commit_msg=$(cat "$1")
+
+# Check for conventional commit format
+if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?: .{1,}"; then
+  echo "❌ Invalid commit message format!"
+  echo "Expected format: <type>[optional scope]: <description>"
+  echo "Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert"
+  echo "Example: feat(auth): add user authentication system"
+  exit 1
+fi
+
+# Check for minimum description length
+description=$(echo "$commit_msg" | head -n 1 | sed 's/^[^:]*: //')
+if [ ${#description} -lt 10 ]; then
+  echo "❌ Commit description too short (minimum 10 characters)"
+  exit 1
+fi
+
+# Check for maximum line length
+if echo "$commit_msg" | head -n 1 | grep -q '.\{73\}'; then
+  echo "❌ Commit subject line too long (maximum 72 characters)"
+  exit 1
+fi
+
+echo "✅ Commit message format is cash money! 💰"
