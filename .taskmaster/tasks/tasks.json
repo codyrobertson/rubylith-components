@@ -724,9 +724,7 @@
       {
         "id": 21,
         "title": "Design System Manifest (DSM) - Create TOML-based manifest for capturing Design System exports to Contract-Driven Component Registry",
-        "description": "Implement a TOML-based manifest system for defining and exporting design system components, tokens, and configurations to the contract-driven registry with automatic contract generation.",
-        "details": "Create DSM parser and validator for TOML manifest files. Define manifest schema with sections for: components (with props, variants, states), design tokens (colors, typography, spacing, etc.), theme configurations, and export metadata. Implement manifest-to-contract transformer that generates component contracts from DSM definitions. Add support for design token inheritance and composition. Create manifest validation with schema enforcement and error reporting. Implement export pipeline that packages components with generated contracts. Add support for component dependencies and peer requirements in manifest. Create manifest versioning system with migration support. Implement design token transformation for different platforms (CSS, JS, iOS, Android). Add manifest CLI tool for validation, export, and contract generation. Create manifest documentation generator for design system docs. Implement manifest diffing for change detection between versions.",
-        "testStrategy": "TOML parsing and validation tests for various manifest formats, contract generation accuracy tests from manifest definitions, design token transformation tests for all platforms, manifest versioning and migration tests, export pipeline integration tests, dependency resolution tests, CLI tool functionality tests, and manifest diffing accuracy verification.",
+        "description": "Implement a TOML-based manifest system for defining and exporting design system components, tokens, and configurations to the contract-driven registry with automatic contract generation. This implementation will be tagged as 'DSM' for the Design System Manifest deliverable.",
         "status": "pending",
         "dependencies": [
           3,
@@ -734,6 +732,8 @@
           11
         ],
         "priority": "medium",
+        "details": "Create DSM parser and validator for TOML manifest files with 'DSM' tag designation. Define manifest schema with sections for: components (with props, variants, states), design tokens (colors, typography, spacing, etc.), theme configurations, and export metadata. Implement manifest-to-contract transformer that generates component contracts from DSM definitions. Add support for design token inheritance and composition. Create manifest validation with schema enforcement and error reporting. Implement export pipeline that packages components with generated contracts under the DSM tag. Add support for component dependencies and peer requirements in manifest. Create manifest versioning system with migration support. Implement design token transformation for different platforms (CSS, JS, iOS, Android). Add manifest CLI tool for validation, export, and contract generation with DSM tagging. Create manifest documentation generator for design system docs. Implement manifest diffing for change detection between versions.",
+        "testStrategy": "TOML parsing and validation tests for various manifest formats, contract generation accuracy tests from manifest definitions, design token transformation tests for all platforms, manifest versioning and migration tests, export pipeline integration tests with DSM tag verification, dependency resolution tests, CLI tool functionality tests, and manifest diffing accuracy verification.",
         "subtasks": []
       }
     ],
