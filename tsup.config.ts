@@ -13,7 +13,7 @@ export default defineConfig((options) => ({
     utils: 'src/utils/index.ts',
   },
   format: ['cjs', 'esm'],
-  dts: true,
+  dts: false, // Temporarily disabled due to Prisma type generation issues
   splitting: true,
   sourcemap: true,
   clean: true,
@@ -21,7 +21,7 @@ export default defineConfig((options) => ({
   minify: options.watch ? false : true,
   target: 'es2022',
   outDir: 'dist',
-  external: ['react', 'react-dom'],
+  external: ['react', 'react-dom', './generated/prisma'],
   noExternal: ['semver', 'zod'],
   platform: 'neutral',
   shims: true,

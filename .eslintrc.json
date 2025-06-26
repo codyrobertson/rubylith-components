@@ -92,6 +92,7 @@
     "node_modules",
     "*.config.js",
     "*.config.ts",
-    ".eslintrc.js"
+    ".eslintrc.js",
+    "generated"
   ]
 }

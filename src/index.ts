@@ -12,6 +12,7 @@ export * from './registry';
 export * from './adapters';
 export * from './environments';
 export * from './utils';
+export * from './database';
 
 // Version info
 export const version = '0.1.0';

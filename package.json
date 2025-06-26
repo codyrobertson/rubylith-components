@@ -58,6 +58,10 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "@types/pg": "^8.15.4",
+    "pg": "^8.16.2",
+    "prisma": "^6.10.1",
     "semver": "^7.6.0",
     "zod": "^3.23.0"
   },

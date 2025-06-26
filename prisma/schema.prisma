@@ -1,0 +1,435 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// =============================================================================
+// Core Models
+// =============================================================================
+
+model Component {
+  id          String   @id @default(cuid())
+  name        String
+  version     String
+  type        ComponentType
+  lifecycle   ComponentLifecycle
+  
+  // Metadata
+  description String
+  author      String
+  license     String
+  homepage    String?
+  repository  String?
+  keywords    Json // String[]
+  
+  // Bundle info
+  bundleSizeMinified Int?
+  bundleSizeGzipped  Int?
+  
+  // Foreign keys
+  contractId  String
+  contract    Contract @relation(fields: [contractId], references: [id])
+  
+  // Relationships
+  dependencies ComponentDependency[] @relation("ComponentDependencies")
+  provides     ComponentProvides[]
+  requires     ComponentRequires[]
+  mountPlans   MountPlan[]
+  
+  // JSON fields
+  metadata Json
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Indexes
+  @@unique([name, version])
+  @@index([name])
+  @@index([type])
+  @@index([lifecycle])
+  @@index([contractId])
+}
+
+model Contract {
+  id            String   @id @default(cuid())
+  name          String
+  version       String
+  schemaVersion String
+  
+  // Metadata
+  description String
+  author      String
+  keywords    Json // String[]
+  
+  // Schema definition
+  schemaProps   Json // ComponentSchema properties
+  schemaEvents  Json // ComponentSchema events  
+  schemaMethods Json // ComponentSchema methods
+  
+  // Validation rules
+  validationRequired Json // String[]
+  validationOptional Json // String[]
+  validationRules    Json
+  
+  // Theme configuration
+  themeTokens    Json // ThemeToken[]
+  themeVariants  Json // ThemeVariant[]
+  themeNamespace String
+  
+  // Layout system
+  layoutType           String
+  layoutGrid           Json?
+  layoutBreakpoints    Json?
+  layoutSpacing        Json?
+  layoutContainerQuery Json?
+  
+  // Style engine
+  styleEngineType         String
+  styleEngineConfig       Json
+  styleEngineOptimization Json?
+  
+  // Runtime requirements
+  runtimeFramework     String
+  runtimeVersion       String
+  runtimePolyfills     Json // String[]
+  runtimeBrowserSupport Json
+  runtimeFeatures      Json?
+  runtimePerformance   Json?
+  
+  // Compatibility
+  compatibilityMinSchemaVersion String
+  compatibilityBreakingChanges  Json // String[]  
+  compatibilityMigrationGuide   String?
+  
+  // Relationships
+  components Component[]
+  
+  // JSON fields
+  metadata Json
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Indexes
+  @@unique([name, version])
+  @@index([name])
+  @@index([schemaVersion])
+}
+
+model Environment {
+  id     String @id @default(cuid())
+  name   String
+  version String
+  status EnvironmentStatus
+  health EnvironmentHealth
+  
+  // Metadata
+  description String
+  provider    String
+  region      String?
+  
+  // Configuration
+  deploymentTarget String
+  deploymentConfig Json
+  
+  // Resource constraints
+  resourcesMemoryLimit    Int?
+  resourcesCpuLimit       String?
+  resourcesStorageLimit   Int?
+  resourcesNetworkPolicy  Json?
+  resourcesSecurityPolicy Json?
+  
+  // Relationships
+  capabilities Capability[]
+  mountPlans   MountPlan[]
+  profiles     Profile[]
+  
+  // JSON fields
+  metadata Json
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastHealthCheck DateTime?
+  
+  // Indexes
+  @@unique([name, version])
+  @@index([name])
+  @@index([status])
+  @@index([health])
+  @@index([provider])
+}
+
+model Capability {
+  id          String   @id @default(cuid())
+  capabilityId String  @unique // External capability ID
+  name        String
+  type        CapabilityType
+  version     String
+  
+  // Metadata
+  description String
+  provider    String
+  
+  // Configuration
+  config Json
+  
+  // Compatibility
+  compatibility Json // Record<string, CompatibilityLevel>
+  
+  // Performance metrics
+  performanceMemoryUsage   Int?
+  performanceLatency       Int?
+  performanceThroughput    Int?
+  performanceMaxRenderTime Int?
+  
+  // Foreign keys
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id])
+  
+  // Relationships
+  dependencies  ComponentDependency[]
+  providedBy    ComponentProvides[]   @relation("CapabilityProvides")
+  requiredBy    ComponentRequires[]   @relation("CapabilityRequires")
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Indexes
+  @@index([capabilityId])
+  @@index([name])
+  @@index([type])
+  @@index([environmentId])
+}
+
+// =============================================================================
+// Relationship Models
+// =============================================================================
+
+model ComponentDependency {
+  id           String @id @default(cuid())
+  name         String
+  versionRange String
+  optional     Boolean @default(false)
+  
+  // Foreign keys
+  componentId String
+  component   Component @relation("ComponentDependencies", fields: [componentId], references: [id])
+  
+  capabilityId String?
+  capability   Capability? @relation(fields: [capabilityId], references: [id])
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@index([componentId])
+  @@index([capabilityId])
+}
+
+model ComponentProvides {
+  id           String @id @default(cuid())
+  name         String
+  versionRange String
+  interface    Json   // Interface definition
+  
+  // Foreign keys
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+  
+  capabilityId String
+  capability   Capability @relation("CapabilityProvides", fields: [capabilityId], references: [id])
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@index([componentId])
+  @@index([capabilityId])
+}
+
+model ComponentRequires {
+  id           String @id @default(cuid())
+  name         String
+  versionRange String
+  optional     Boolean @default(false)
+  fallback     String?
+  
+  // Foreign keys
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+  
+  capabilityId String
+  capability   Capability @relation("CapabilityRequires", fields: [capabilityId], references: [id])
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@index([componentId])
+  @@index([capabilityId])
+}
+
+// =============================================================================
+// Mount Plan Models
+// =============================================================================
+
+model MountPlan {
+  id       String @id @default(cuid())
+  name     String
+  version  String
+  status   MountPlanStatus
+  mode     MountMode
+  priority Int      
+  // Configuration
+  targetPath    String
+  mountOptions  Json
+  
+  // Execution details
+  executionStartTime    DateTime?
+  executionEndTime      DateTime?
+  executionLogs         Json // String[]
+  executionErrorMessage String?
+  executionRetryCount   Int        
+  // Foreign keys
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+  
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id])
+  
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id])
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Indexes
+  @@index([componentId])
+  @@index([environmentId])
+  @@index([profileId])
+  @@index([status])
+  @@index([priority])
+}
+
+model Profile {
+  id          String @id @default(cuid())
+  name        String
+  version     String
+  scope       ProfileScope
+  permissions Json // ProfilePermission[]
+  
+  // Configuration
+  description String
+  template    Json // ProfileTemplate
+  sharing     Json // ProfileSharing
+  
+  // Foreign keys
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id])
+  
+  // Relationships
+  mountPlans MountPlan[]
+  
+  // JSON fields
+  metadata Json
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Indexes
+  @@unique([name, version, environmentId])
+  @@index([environmentId])
+  @@index([scope])
+}
+
+// =============================================================================
+// Enums
+// =============================================================================
+
+enum ComponentType {
+  UI_COMPONENT
+  LAYOUT_COMPONENT
+  DATA_COMPONENT
+  NAV_COMPONENT
+  FORM_COMPONENT
+  UTILITY_COMPONENT
+  INTEGRATION_COMPONENT
+}
+
+enum ComponentLifecycle {
+  DEVELOPMENT
+  ALPHA
+  BETA
+  STABLE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum EnvironmentStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  ERROR
+}
+
+enum EnvironmentHealth {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+  UNKNOWN
+}
+
+enum CapabilityType {
+  THEME_PROVIDER
+  LAYOUT_ENGINE
+  STYLE_INJECTION
+  STATE_MANAGEMENT
+  ROUTING
+  I18N
+  ANALYTICS
+  ERROR_BOUNDARY
+  PERFORMANCE
+  TESTING
+  ACCESSIBILITY
+  SEO
+}
+
+enum MountPlanStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum MountMode {
+  REPLACE
+  APPEND
+  MERGE
+  CONDITIONAL
+}
+
+enum ProfileScope {
+  GLOBAL
+  ENVIRONMENT
+  COMPONENT
+  USER
+}
+
+enum ProfilePermission {
+  READ
+  WRITE
+  EXECUTE
+  ADMIN
+}
