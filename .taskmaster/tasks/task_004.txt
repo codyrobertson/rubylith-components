@@ -1,0 +1,55 @@
+# Task ID: 4
+# Title: Build Asset Detection Engine
+# Status: pending
+# Dependencies: 3
+# Priority: medium
+# Description: Create intelligent heuristic system to auto-detect design system assets in project repositories
+# Details:
+Implement file system scanning to detect: token files (JSON, JS, TS in common locations), theme providers (React components, CSS files), layout systems (grid configs, breakpoint files), and framework indicators (package.json dependencies). Create scoring system for confidence levels and fallback prompts when detection is uncertain. Support common DS patterns like Design Tokens Community Group format, Tailwind config files, and styled-components themes.
+
+# Test Strategy:
+Detection accuracy tests across different DS structures, false positive/negative tracking, and performance benchmarks for large repositories
+
+# Subtasks:
+## 1. Design and create database schema [pending]
+### Dependencies: None
+### Description: Define the complete database schema including all tables, fields, data types, and relationships for components, contracts, environments, and related entities
+### Details:
+Create comprehensive ERD diagrams, define naming conventions, establish primary/foreign key relationships, document all table structures and field purposes
+
+## 2. Set up PostgreSQL connection and ORM configuration [pending]
+### Dependencies: None
+### Description: Install and configure PostgreSQL database, set up Prisma ORM, establish database connection strings for different environments
+### Details:
+Install PostgreSQL locally/container, configure Prisma schema file, set up environment variables for database URLs, test basic connectivity
+
+## 3. Create migration system and initial migrations [pending]
+### Dependencies: 4.1, 4.2
+### Description: Implement database migration framework and create initial migration files based on the designed schema
+### Details:
+Set up Prisma migrate, create initial migration for base schema, implement migration scripts, establish versioning strategy for schema changes
+
+## 4. Implement core tables (components, contracts, environments) [pending]
+### Dependencies: 4.3
+### Description: Create and migrate the primary tables for components, contracts, and environments with all required fields and constraints
+### Details:
+Define components table with metadata fields, contracts table with schema/validation data, environments table with configuration, implement constraints and defaults
+
+## 5. Add relationship tables and indexes [pending]
+### Dependencies: 4.4
+### Description: Create junction tables for many-to-many relationships, implement foreign key constraints, and add performance indexes
+### Details:
+Create component_contracts, environment_components junction tables, add composite indexes for query optimization, implement cascading rules for deletions
+
+## 6. Build database access layer with error handling [pending]
+### Dependencies: 4.5
+### Description: Implement repository pattern with CRUD operations, add comprehensive error handling and validation at the database layer
+### Details:
+Create repository classes for each entity, implement typed queries with Prisma, add error handling for constraints violations, implement data validation
+
+## 7. Create connection pooling and transaction management [pending]
+### Dependencies: 4.6
+### Description: Configure database connection pooling for performance, implement transaction support for atomic operations across multiple tables
+### Details:
+Configure Prisma connection pool settings, implement transaction wrapper functions, add retry logic for transient failures, create health check endpoints
+

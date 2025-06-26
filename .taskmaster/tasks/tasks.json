@@ -3,221 +3,221 @@
     "tasks": [
       {
         "id": 1,
-        "title": "Initialize Project Structure and Configuration",
-        "description": "Set up the foundational project structure with necessary configuration files, build tools, and development environment setup for the Contract-Driven Component Registry system.",
-        "details": "Create project root with package.json using Node.js 18+, TypeScript 5.x configuration, ESLint and Prettier setup. Initialize Git repository with proper .gitignore. Set up basic folder structure: /src, /tests, /docs, /examples. Configure build tools (Vite/Webpack) for library bundling. Set up CI/CD pipeline configuration files (.github/workflows). Install core dependencies: TypeScript, React 18+, semantic versioning libraries, and testing frameworks (Jest, React Testing Library).",
-        "testStrategy": "Verify project builds successfully, all linting rules pass, TypeScript compilation works without errors, and basic CI pipeline runs successfully.",
+        "title": "Initialize Project Structure and Dependencies",
+        "description": "Set up the DSM CLI project with TypeScript, Node.js tooling, and core dependencies for TOML parsing and CLI framework",
+        "details": "Create a new Node.js project with TypeScript configuration. Install core dependencies: @iarna/toml for TOML parsing, commander.js for CLI framework, chalk for colored output, and jest for testing. Set up package.json with proper bin entry for 'dsm' command. Configure TypeScript with strict mode and ESM output. Create basic project structure with src/, tests/, and bin/ directories.",
+        "testStrategy": "Unit tests for project structure validation, dependency resolution checks, and CLI binary accessibility tests",
         "priority": "high",
         "dependencies": [],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create base project structure with package.json and TypeScript config",
-            "description": "Initialize the project directory with npm/yarn, create package.json, and set up TypeScript configuration files",
+            "title": "Create base project structure",
+            "description": "Initialize project with package.json and TypeScript configuration",
             "dependencies": [],
-            "details": "Initialize npm project with 'npm init', create tsconfig.json with appropriate compiler options for the project type, set up src and dist directories, configure module resolution and output settings\n<info added on 2025-06-25T19:59:23.678Z>\nSuccessfully completed npm initialization with enhanced package.json containing comprehensive project metadata, build scripts (build, dev, typecheck, clean), and all necessary dependencies for TypeScript development. Implemented robust TypeScript configuration with strict compiler settings, ES2020 target, path aliases (@/* for src/), and proper module resolution. Created complete directory structure including src/, __TESTS__/, __DOCS__/, and examples/ directories with appropriate index.ts placeholder files for core, ui, layout, navigation, and utility modules. Integrated tsup as the build tool with TypeScript support and proper entry/output configuration. Verified functionality by successfully running npm run build and npm run typecheck commands.\n</info added on 2025-06-25T19:59:23.678Z>",
-            "status": "done",
+            "details": "Set up package.json with basic metadata, install TypeScript as a dev dependency, create tsconfig.json with appropriate compiler options for the project type, establish src and dist folder structure",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Set up linting and formatting tools (ESLint, Prettier)",
-            "description": "Install and configure ESLint with TypeScript support and Prettier for consistent code formatting",
+            "title": "Set up linting and formatting tools",
+            "description": "Install and configure ESLint and Prettier for code quality",
             "dependencies": [
               1
             ],
-            "details": "Install eslint, @typescript-eslint/parser, @typescript-eslint/eslint-plugin, prettier, eslint-config-prettier. Create .eslintrc.js and .prettierrc configuration files. Add lint and format scripts to package.json\n<info added on 2025-06-25T20:40:19.932Z>\nImplementation completed successfully. ESLint configured with @typescript-eslint/parser and @typescript-eslint/eslint-plugin using strict type-aware linting rules. Prettier setup with consistent formatting standards. Created .eslintignore and .prettierignore files to exclude appropriate directories. Added npm scripts: lint, lint:fix for ESLint operations and format, format:check for Prettier operations. Integrated eslint-config-prettier to prevent rule conflicts between ESLint and Prettier. Both tools tested and functioning correctly with no configuration conflicts.\n</info added on 2025-06-25T20:40:19.932Z>",
-            "status": "done",
+            "details": "Install ESLint with TypeScript parser and plugins, create .eslintrc configuration, install Prettier with TypeScript support, create .prettierrc configuration, set up editor integration scripts in package.json",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Configure build tools and bundling",
-            "description": "Set up build process with appropriate bundler and compilation tools for TypeScript",
+            "description": "Set up build system for TypeScript compilation and bundling",
             "dependencies": [
               1
             ],
-            "details": "Choose and configure bundler (webpack, rollup, or esbuild), create build configuration files, set up development and production build scripts, configure source maps and optimization settings",
-            "status": "done",
+            "details": "Choose and configure bundler (webpack, Rollup, or esbuild), create build configuration files, set up development and production build scripts, configure source maps and output optimization",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Set up Git repository and CI/CD pipeline basics",
+            "title": "Set up Git repository and CI/CD pipeline",
             "description": "Initialize Git repository and configure basic CI/CD workflows",
             "dependencies": [
               1,
               2,
               3
             ],
-            "details": "Initialize git repo, create .gitignore file, set up GitHub Actions or similar CI/CD platform with workflows for linting, testing, and building on push/PR, configure branch protection rules",
-            "status": "done",
+            "details": "Initialize Git repository, create .gitignore file, set up GitHub Actions or similar CI/CD platform, create workflow files for linting, testing, and building on push/PR, configure branch protection rules",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Install and configure testing frameworks",
-            "description": "Set up testing infrastructure with appropriate test runner and assertion libraries",
+            "description": "Set up testing infrastructure with appropriate frameworks",
             "dependencies": [
               1,
               2
             ],
-            "details": "Install Jest or Vitest with TypeScript support, configure test environment and coverage settings, create test directory structure, add test scripts to package.json, set up example test files",
-            "status": "done",
+            "details": "Install testing framework (Jest or Vitest), configure test runner for TypeScript, set up test directory structure, create example test files, add test scripts to package.json, configure code coverage reporting",
+            "status": "pending",
             "testStrategy": ""
           }
         ]
       },
       {
         "id": 2,
-        "title": "Define Core Data Models and TypeScript Interfaces",
-        "description": "Create comprehensive TypeScript interfaces and data models for Component, Contract, Environment, Capability, Mount Plan, and Profile entities.",
-        "details": "Define interfaces in /src/types/: Component (name, version, contract, metadata), Contract (theme, tokens, layout, styleEngine, runtime requirements), Environment (id, capabilities, compatibility), Capability (type, version, configuration), MountPlan (component, environment, strategy, adapters), Profile (name, environment, configuration). Implement SemVer version handling using 'semver' library. Add JSON Schema validation for contract structure. Create utility types for version ranges, dependency resolution, and compatibility checking.",
-        "testStrategy": "Unit tests for type validation, JSON schema validation tests, SemVer version parsing and comparison tests, and interface compatibility tests.",
+        "title": "Define TOML Schema and Validation Rules",
+        "description": "Implement the design-system.toml schema definition with strict validation rules according to the PRD specification",
+        "details": "Create TypeScript interfaces and Zod schemas for the complete TOML structure including: name, version, framework, styleEngine, tokens (root, resolution, namespaces), theme (entry, provider, variants), layout (system, responsive), optional extends field, and bridge arrays. Implement validation functions that enforce required fields, valid enum values, and semantic checks like file path existence.",
+        "testStrategy": "Comprehensive schema validation tests with valid/invalid TOML examples, edge cases for optional fields, and semantic validation tests",
         "priority": "high",
         "dependencies": [
           1
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
             "title": "Define Component and Contract interfaces",
-            "description": "Create TypeScript interfaces for Component and Contract types including their metadata, dependencies, and structure",
+            "description": "Create TypeScript interfaces for Component and Contract, including all required properties, metadata, and relationship mappings",
             "dependencies": [],
-            "details": "Define Component interface with fields like name, version, type, dependencies, provides, requires. Define Contract interface with fields like name, version, input/output schemas, and validation rules. Include proper type constraints and documentation.",
-            "status": "done",
+            "details": "Define Component interface with id, name, version, type, capabilities, requirements, and metadata. Define Contract interface with id, provider, consumer, version, endpoints, and validation rules. Include proper typing for all nested structures.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Define Environment and Capability interfaces",
-            "description": "Create TypeScript interfaces for Environment configuration and Capability declarations",
+            "description": "Create TypeScript interfaces for Environment and Capability, establishing the runtime context and feature declarations",
             "dependencies": [],
-            "details": "Define Environment interface with runtime settings, available capabilities, and constraints. Define Capability interface with name, version, type, and compatibility requirements. Include proper typing for capability negotiation.",
-            "status": "done",
+            "details": "Define Environment interface with id, name, type, configuration, and constraints. Define Capability interface with id, name, version, type, parameters, and compatibility rules. Include proper typing for configuration objects and constraint definitions.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Define MountPlan and Profile interfaces",
-            "description": "Create TypeScript interfaces for MountPlan execution and Profile configuration",
+            "description": "Create TypeScript interfaces for MountPlan and Profile, handling component orchestration and deployment configurations",
             "dependencies": [
               1,
               2
             ],
-            "details": "Define MountPlan interface with component graph, dependency resolution, and execution order. Define Profile interface with environment-specific configurations, feature flags, and deployment settings. Ensure proper typing for plan validation.",
-            "status": "done",
+            "details": "Define MountPlan interface with id, components, dependencies, execution order, and environment mappings. Define Profile interface with id, name, environment, capabilities, and configuration overrides. Ensure proper references to Component and Environment interfaces.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Implement SemVer version handling utilities",
-            "description": "Create utility functions for parsing, comparing, and validating semantic versions",
+            "description": "Build utility functions for semantic versioning operations including parsing, comparison, and compatibility checking",
             "dependencies": [],
-            "details": "Implement functions for version parsing, comparison (greater than, less than, compatible), range matching, and constraint satisfaction. Include proper error handling and type guards for version strings.",
-            "status": "done",
+            "details": "Create parseSemVer function to extract major, minor, patch versions. Implement compareSemVer for version comparison. Build isCompatibleVersion for checking version compatibility ranges. Include support for pre-release and build metadata.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Create JSON Schema validation setup",
-            "description": "Set up JSON Schema validation infrastructure for runtime validation of interfaces",
+            "description": "Set up JSON Schema validation infrastructure for validating all interface data structures at runtime",
             "dependencies": [
               1,
               2,
               3
             ],
-            "details": "Configure JSON Schema validator, create schema definitions for each interface, implement validation functions with proper error reporting. Include schema composition for nested structures and cross-references.",
-            "status": "done",
+            "details": "Install and configure ajv for JSON Schema validation. Create schema definitions for each interface. Build validation functions with proper error handling and type guards. Include schema composition for nested structures.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Build utility types for compatibility checking",
-            "description": "Create TypeScript utility types and functions for checking interface compatibility",
+            "description": "Create TypeScript utility types and functions for checking compatibility between components, contracts, and environments",
             "dependencies": [
               1,
               2,
               3,
               4
             ],
-            "details": "Implement type predicates, compatibility checkers for components/contracts, capability matchers, and constraint validators. Include utilities for type narrowing and exhaustive checking.",
-            "status": "done",
+            "details": "Build CompatibilityResult type for validation outcomes. Create checkComponentCompatibility function for capability matching. Implement checkContractCompatibility for interface validation. Build checkEnvironmentCompatibility for runtime constraint checking.",
+            "status": "pending",
             "testStrategy": ""
           }
         ]
       },
       {
         "id": 3,
-        "title": "Implement Contract Schema Definition and Validation",
-        "description": "Create the contract schema specification with JSON Schema validation and TypeScript type guards for ensuring contract integrity.",
-        "details": "Implement JSON Schema for contract validation following the PRD specification. Create TypeScript type guards using libraries like 'zod' or 'joi' for runtime validation. Implement contract versioning logic with semantic versioning rules. Add validation for theme requirements (variants, tokens), layout system specifications, style engine configurations, and runtime framework requirements. Create contract parsing utilities with detailed error messages for validation failures.",
-        "testStrategy": "Comprehensive validation tests with valid and invalid contract examples, schema edge case testing, version compatibility validation, and error message clarity verification.",
+        "title": "Implement Core TOML Parser and Writer",
+        "description": "Build robust TOML parsing and writing utilities with error handling and format preservation",
+        "details": "Create TOML parser wrapper around @iarna/toml with enhanced error reporting and line number tracking. Implement TOML writer that preserves formatting and comments. Add utilities for reading/writing design-system.toml files with proper error handling for file system operations and parsing errors. Include validation integration to ensure parsed content matches schema.",
+        "testStrategy": "Parser tests with malformed TOML, writer round-trip tests, error handling validation, and format preservation tests",
         "priority": "high",
         "dependencies": [
           2
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
             "title": "Create base JSON Schema for contracts",
-            "description": "Design and implement the foundational JSON Schema structure that defines the overall contract format, including top-level properties and basic validation rules",
+            "description": "Design and implement the foundational JSON Schema structure that defines the core contract format, including top-level properties, required fields, and basic validation rules",
             "dependencies": [],
-            "details": "Define the root schema with required fields, establish naming conventions, version constraints, and basic structural requirements. Include meta-schema references and documentation annotations.",
-            "status": "done",
+            "details": "Define the root schema with properties for contract version, metadata, theme configuration, layout definitions, and style engine settings. Include proper schema versioning and extensibility patterns.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Implement theme validation (variants, tokens)",
-            "description": "Build validation schemas for theme configuration including design tokens, color variants, typography scales, and theme inheritance patterns",
+            "description": "Build validation logic for theme configuration including design tokens (colors, typography, spacing) and theme variants (light, dark, custom themes)",
             "dependencies": [
               1
             ],
-            "details": "Create schemas for color tokens, spacing scales, typography systems, and variant definitions. Implement validation for theme inheritance, token references, and cross-theme consistency checks.",
-            "status": "done",
+            "details": "Create schemas for color palettes, typography scales, spacing systems, and variant definitions. Validate token references, inheritance chains, and ensure all theme values conform to expected formats.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Build layout system validation",
-            "description": "Develop validation schemas for layout configurations including grid systems, breakpoints, container queries, and responsive design patterns",
+            "description": "Implement validation for layout definitions including grid systems, flexbox configurations, responsive breakpoints, and component layout constraints",
             "dependencies": [
               1
             ],
-            "details": "Define schemas for grid configurations, flexbox patterns, spacing systems, and breakpoint definitions. Include validation for layout composition rules and responsive behavior specifications.",
-            "status": "done",
+            "details": "Validate layout properties like grid templates, flex properties, spacing rules, and breakpoint definitions. Ensure layout configurations are compatible with the rendering engine.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Add style engine configuration validation",
-            "description": "Create validation schemas for style engine settings including CSS-in-JS configurations, compilation options, and runtime optimization settings",
+            "description": "Create validation for style engine settings including CSS-in-JS configurations, styling strategies, and performance optimization flags",
             "dependencies": [
               1
             ],
-            "details": "Implement validation for style injection methods, CSS extraction options, vendor prefixing rules, and performance optimization configurations. Include browser compatibility settings validation.",
-            "status": "done",
+            "details": "Validate style engine options, CSS generation strategies, runtime vs build-time styling flags, and optimization settings. Ensure compatibility with chosen styling libraries.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Implement runtime requirements validation",
-            "description": "Build validation for runtime dependencies, browser requirements, polyfill configurations, and execution environment constraints",
+            "description": "Build validation for runtime dependencies, browser requirements, polyfill needs, and performance constraints specified in contracts",
             "dependencies": [
               1
             ],
-            "details": "Create schemas for browser compatibility matrices, required polyfills, runtime feature detection, and environment-specific configurations. Include validation for progressive enhancement strategies.",
-            "status": "done",
+            "details": "Validate browser compatibility targets, required polyfills, performance budgets, and runtime environment constraints. Check for conflicting requirements and missing dependencies.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Create TypeScript type guards with Zod/Joi",
-            "description": "Implement runtime type validation using Zod or Joi libraries to create type-safe contract validation with TypeScript integration",
+            "description": "Implement runtime type validation using Zod or Joi to create type-safe contract parsing with automatic TypeScript type inference",
             "dependencies": [
               1,
               2,
@@ -225,130 +225,128 @@
               4,
               5
             ],
-            "details": "Build composable validators using Zod/Joi schemas, create type inference from schemas, implement custom validation rules, and ensure full TypeScript type safety with proper error typing.",
-            "status": "done",
+            "details": "Build composable validation schemas using Zod/Joi that mirror the JSON Schema structure. Create type guards for each contract section with proper error messages and type inference.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 7,
             "title": "Build contract parsing utilities with error handling",
-            "description": "Develop utilities for parsing, transforming, and validating contracts with comprehensive error handling and recovery strategies",
+            "description": "Develop utilities for parsing, validating, and transforming contracts with comprehensive error handling and helpful error messages",
             "dependencies": [
               6
             ],
-            "details": "Implement contract loaders, parsers with error recovery, validation pipelines, and transformation utilities. Include detailed error reporting with line numbers, suggestions, and recovery mechanisms.",
-            "status": "done",
+            "details": "Create parser functions that validate contracts, provide detailed error locations, suggest fixes for common issues, and transform valid contracts into normalized internal formats.",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 8,
             "title": "Add comprehensive validation test suite",
-            "description": "Create extensive test coverage for all validation components including unit tests, integration tests, and real-world contract validation scenarios",
+            "description": "Create extensive test coverage for all validation scenarios including valid contracts, edge cases, and various error conditions",
             "dependencies": [
               7
             ],
-            "details": "Build test fixtures for valid and invalid contracts, edge cases, error scenarios, and performance benchmarks. Include snapshot testing for error messages and validation results.",
-            "status": "done",
+            "details": "Write unit tests for each validation module, integration tests for complete contract validation, and snapshot tests for error messages. Include fixtures for valid and invalid contracts.",
+            "status": "pending",
             "testStrategy": ""
           }
         ]
       },
       {
         "id": 4,
-        "title": "Build Registry Database Layer",
-        "description": "Implement the database layer for storing components, contracts, environments, and metadata with proper indexing and query optimization.",
-        "details": "Set up PostgreSQL database with proper schema design. Create tables for components, contracts, environments, capabilities, mount_plans, and profiles. Implement database migrations using a tool like 'knex' or 'prisma'. Add indexes for performance: component name/version lookups, contract dependency queries, environment capability searches. Implement connection pooling and transaction management. Create database access layer with proper error handling and connection retry logic.",
-        "testStrategy": "Database migration tests, connection pool stress tests, query performance benchmarks, transaction rollback tests, and data integrity validation.",
-        "priority": "high",
+        "title": "Build Asset Detection Engine",
+        "description": "Create intelligent heuristic system to auto-detect design system assets in project repositories",
+        "details": "Implement file system scanning to detect: token files (JSON, JS, TS in common locations), theme providers (React components, CSS files), layout systems (grid configs, breakpoint files), and framework indicators (package.json dependencies). Create scoring system for confidence levels and fallback prompts when detection is uncertain. Support common DS patterns like Design Tokens Community Group format, Tailwind config files, and styled-components themes.",
+        "testStrategy": "Detection accuracy tests across different DS structures, false positive/negative tracking, and performance benchmarks for large repositories",
+        "priority": "medium",
         "dependencies": [
-          2
+          3
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
             "title": "Design and create database schema",
-            "description": "Design the complete database schema including all tables, relationships, constraints, and naming conventions",
+            "description": "Define the complete database schema including all tables, fields, data types, and relationships for components, contracts, environments, and related entities",
             "dependencies": [],
-            "details": "Create ERD diagrams defining tables for components, contracts, environments, and their relationships. Define primary keys, foreign keys, unique constraints, and data types. Document schema design decisions and normalization approach.",
-            "status": "done",
+            "details": "Create comprehensive ERD diagrams, define naming conventions, establish primary/foreign key relationships, document all table structures and field purposes",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Set up PostgreSQL connection and ORM configuration",
-            "description": "Configure PostgreSQL database connection and set up ORM (TypeORM/Prisma) with TypeScript integration",
+            "description": "Install and configure PostgreSQL database, set up Prisma ORM, establish database connection strings for different environments",
             "dependencies": [],
-            "details": "Install PostgreSQL driver and ORM dependencies. Configure database connection strings for different environments. Set up TypeScript types and decorators for ORM entities. Configure connection options including SSL, timeouts, and retry logic.",
-            "status": "done",
+            "details": "Install PostgreSQL locally/container, configure Prisma schema file, set up environment variables for database URLs, test basic connectivity",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Create migration system and initial migrations",
-            "description": "Implement database migration system and create initial migration files for base schema",
+            "description": "Implement database migration framework and create initial migration files based on the designed schema",
             "dependencies": [
               1,
               2
             ],
-            "details": "Set up migration tooling and scripts. Create initial migration for base tables structure. Implement rollback capabilities. Add migration versioning and tracking. Create npm scripts for running migrations.",
-            "status": "done",
+            "details": "Set up Prisma migrate, create initial migration for base schema, implement migration scripts, establish versioning strategy for schema changes",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Implement core tables (components, contracts, environments)",
-            "description": "Create entity models and database tables for core business objects",
+            "description": "Create and migrate the primary tables for components, contracts, and environments with all required fields and constraints",
             "dependencies": [
               3
             ],
-            "details": "Implement components table with fields for name, type, version, metadata. Create contracts table with implementation details and validation rules. Build environments table with configuration and deployment info. Add appropriate indexes for query performance.",
-            "status": "done",
+            "details": "Define components table with metadata fields, contracts table with schema/validation data, environments table with configuration, implement constraints and defaults",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Add relationship tables and indexes",
-            "description": "Create junction tables for many-to-many relationships and optimize with indexes",
+            "description": "Create junction tables for many-to-many relationships, implement foreign key constraints, and add performance indexes",
             "dependencies": [
               4
             ],
-            "details": "Create component_contracts junction table. Add environment_components relationship table. Implement cascading deletes and updates. Create composite indexes for common query patterns. Add unique constraints for business rules.",
-            "status": "done",
+            "details": "Create component_contracts, environment_components junction tables, add composite indexes for query optimization, implement cascading rules for deletions",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Build database access layer with error handling",
-            "description": "Create repository pattern implementation with comprehensive error handling",
+            "description": "Implement repository pattern with CRUD operations, add comprehensive error handling and validation at the database layer",
             "dependencies": [
-              4,
               5
             ],
-            "details": "Implement repository interfaces for each entity. Create base repository with common CRUD operations. Add custom query methods for complex operations. Implement proper error handling with typed exceptions. Add logging for database operations.",
-            "status": "done",
+            "details": "Create repository classes for each entity, implement typed queries with Prisma, add error handling for constraints violations, implement data validation",
+            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 7,
             "title": "Create connection pooling and transaction management",
-            "description": "Implement database connection pooling and transaction support for data consistency",
+            "description": "Configure database connection pooling for performance, implement transaction support for atomic operations across multiple tables",
             "dependencies": [
-              2,
               6
             ],
-            "details": "Configure connection pool settings (min/max connections, idle timeout). Implement transaction decorator/wrapper for atomic operations. Add retry logic for transient failures. Create health check endpoint for database connectivity. Implement connection lifecycle management.",
-            "status": "done",
+            "details": "Configure Prisma connection pool settings, implement transaction wrapper functions, add retry logic for transient failures, create health check endpoints",
+            "status": "pending",
             "testStrategy": ""
           }
         ]
       },
       {
         "id": 5,
-        "title": "Create Registry API Server Foundation",
-        "description": "Set up the Express.js API server with middleware, routing, authentication, and basic error handling infrastructure.",
-        "details": "Initialize Express.js server with TypeScript. Configure middleware: CORS, body parsing, request logging (Winston), rate limiting, compression. Set up API versioning (/api/v1). Implement authentication middleware using JWT tokens. Add request validation middleware using express-validator. Set up error handling middleware with proper HTTP status codes. Configure environment-based configuration using dotenv. Add health check endpoints and basic API documentation with Swagger/OpenAPI.",
-        "testStrategy": "API server startup tests, middleware functionality tests, authentication flow tests, error handling validation, and API documentation generation verification.",
+        "title": "Implement 'dsm generate' Command",
+        "description": "Create the primary CLI command that auto-detects DS assets and generates design-system.toml files",
+        "details": "Build interactive CLI command using commander.js that: scans project for DS assets, presents detected configurations with confidence scores, prompts for missing/uncertain values, generates valid design-system.toml file, and provides success feedback. Include --force flag to overwrite existing files and --dry-run for preview mode. Ensure sub-1-second performance target for typical repositories.",
+        "testStrategy": "End-to-end generation tests on sample repositories, performance benchmarks, interactive prompt testing, and edge case handling",
         "priority": "high",
         "dependencies": [
           4
@@ -357,71 +355,67 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Initialize Express server with TypeScript support",
-            "description": "Set up Express server with TypeScript configuration, including type definitions and basic server structure",
+            "title": "Set up CLI command structure with commander.js",
+            "description": "Create the 'dsm generate' command using commander.js with proper options and help text",
             "dependencies": [],
-            "details": "Install Express, TypeScript, and necessary type definitions (@types/express, @types/node). Create server.ts with basic Express app initialization, configure tsconfig.json with appropriate compiler options for Node.js environment",
+            "details": "Configure commander.js command with description, options (--force, --dry-run, --output), and help examples. Set up command action handler with proper error handling and exit codes. Implement option parsing and validation.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Configure essential middleware (CORS, parsing, compression)",
-            "description": "Install and configure core middleware components for request handling and optimization",
+            "title": "Integrate asset detection engine",
+            "description": "Connect the generate command with the asset detection engine to scan for design system files",
             "dependencies": [
               1
             ],
-            "details": "Install and configure cors, body-parser/express.json(), express.urlencoded(), compression middleware. Set up proper CORS options for allowed origins, methods, and headers. Configure JSON and URL-encoded parsing limits",
+            "details": "Call asset detection engine from command handler, pass current working directory for scanning, handle detection results with confidence scores. Create data structure to hold detected assets and missing values for prompting.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Implement authentication and authorization middleware",
-            "description": "Create middleware for handling user authentication and authorization checks",
+            "title": "Build interactive prompts for missing values",
+            "description": "Implement interactive CLI prompts using inquirer.js for gathering missing or uncertain configuration values",
             "dependencies": [
-              1,
               2
             ],
-            "details": "Implement JWT or session-based authentication middleware, create authorization middleware for role-based access control, set up secure token storage and validation, implement refresh token mechanism if needed",
+            "details": "Create prompt flows for missing required fields (name, version, framework), show detected values with confidence scores for confirmation, implement conditional prompts based on framework selection. Add validation for user inputs and helpful default suggestions.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Set up request validation and error handling",
-            "description": "Implement validation middleware and centralized error handling",
+            "title": "Implement TOML generation and file writing",
+            "description": "Generate valid design-system.toml content from detected and prompted values, then write to disk",
             "dependencies": [
-              1,
-              2
+              3
             ],
-            "details": "Install validation library (e.g., express-validator or joi), create validation middleware for request bodies/params/queries, implement global error handling middleware, create custom error classes for different error types",
+            "details": "Transform collected data into TOML structure, use TOML writer to generate properly formatted output, implement file writing with proper error handling. Handle --dry-run mode to preview without writing, manage --force flag for overwriting existing files.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Configure logging and monitoring",
-            "description": "Set up structured logging and request monitoring capabilities",
+            "title": "Add performance optimization and progress feedback",
+            "description": "Optimize scanning performance and provide real-time progress feedback to users",
             "dependencies": [
-              1,
-              2
+              2,
+              4
             ],
-            "details": "Install and configure logging library (e.g., winston or pino), implement request logging middleware, set up log levels and formatting, configure log rotation if needed, add request ID tracking for debugging",
+            "details": "Implement progress bars using ora or similar for file scanning, optimize file system operations with parallel scanning where possible. Add performance timing to ensure sub-1-second execution for typical projects. Show clear success/error messages with next steps.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 6,
-            "title": "Add API documentation with Swagger/OpenAPI",
-            "description": "Integrate Swagger/OpenAPI for automatic API documentation generation",
+            "title": "Implement --force and --dry-run functionality",
+            "description": "Add support for force overwrite and dry-run preview modes with appropriate user feedback",
             "dependencies": [
-              1,
-              2,
-              3,
-              4
+              4,
+              5
             ],
-            "details": "Install swagger-ui-express and swagger-jsdoc, configure Swagger options and API metadata, add JSDoc comments to routes and schemas, set up Swagger UI endpoint, configure authentication for documentation access",
+            "details": "For --force: check for existing design-system.toml, warn user before overwriting, create backup of existing file. For --dry-run: show generated TOML content in console with syntax highlighting, display what would be written without actual file operations.",
             "status": "pending",
             "testStrategy": ""
           }
@@ -429,100 +423,108 @@
       },
       {
         "id": 6,
-        "title": "Implement Component Registration API",
-        "description": "Build the API endpoints for component registration, versioning, and metadata management with proper validation and storage.",
-        "details": "Implement POST /api/v1/components endpoint with multipart file upload support for component packages. Add contract validation before registration. Implement GET /api/v1/components/{name} and GET /api/v1/components/{name}/versions endpoints. Add semantic version validation and conflict detection. Implement component metadata storage including description, tags, author, and timestamps. Add support for component package storage (file system or cloud storage). Implement version comparison and latest version resolution.",
-        "testStrategy": "Component registration flow tests, duplicate version rejection tests, contract validation integration tests, metadata storage verification, and version resolution accuracy tests.",
+        "title": "Implement 'dsm validate' Command",
+        "description": "Create validation command that parses TOML files and performs comprehensive schema and semantic checks",
+        "details": "Build validation command that: parses design-system.toml using TOML parser, validates against schema with detailed error messages, performs semantic checks (file path existence, valid framework/styleEngine values), checks token namespace validity, and provides actionable error reporting with line numbers and suggestions for fixes.",
+        "testStrategy": "Validation tests with various invalid TOML files, semantic error detection tests, error message clarity validation, and performance tests",
         "priority": "high",
         "dependencies": [
-          3,
-          5
+          3
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create component upload endpoint with file handling",
-            "description": "Build a RESTful endpoint to accept component file uploads with multipart form data support",
+            "title": "Set up validate command with commander.js",
+            "description": "Create the 'dsm validate' CLI command structure with proper options and help documentation",
             "dependencies": [],
-            "details": "Implement POST /api/v1/components/upload endpoint using multipart/form-data. Handle file size limits, allowed file types (.rb, .zip), and basic request validation. Return upload ID for tracking.",
+            "details": "Configure commander.js command with description, options (--file for specific file path, --strict for enhanced validation), and help examples. Set up command action handler with proper error handling and exit codes. Implement option parsing for file path detection.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Implement contract validation integration",
-            "description": "Integrate contract validation system to verify component interfaces and dependencies",
+            "title": "Implement TOML parsing with error handling",
+            "description": "Create robust TOML parser wrapper that provides detailed error information including line numbers and parsing context",
             "dependencies": [
               1
             ],
-            "details": "Parse uploaded component files to extract contract definitions. Validate input/output schemas, method signatures, and dependency declarations against contract registry. Reject invalid components early.",
+            "details": "Wrap @iarna/toml parser with enhanced error handling, capture line and column numbers for syntax errors, provide context around error locations, handle file reading errors gracefully. Return structured error objects with actionable information.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Build version conflict detection",
-            "description": "Create system to detect and handle version conflicts during component registration",
+            "title": "Perform schema validation against defined schema",
+            "description": "Validate parsed TOML content against the design-system.toml schema using Zod or similar validation library",
             "dependencies": [
               2
             ],
-            "details": "Check if component name/version already exists. Implement semantic versioning comparison. Detect breaking changes between versions. Support force override with proper authorization.",
+            "details": "Apply Zod schema validation to parsed TOML data, check all required fields (name, version, framework, styleEngine), validate nested structures (tokens, theme, layout), collect all validation errors rather than failing on first error. Generate user-friendly error messages.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Add component metadata storage",
-            "description": "Design and implement database schema for storing component metadata",
+            "title": "Add semantic validation checks",
+            "description": "Implement deeper validation beyond schema to check file paths existence, valid enum values, and logical consistency",
             "dependencies": [
               3
             ],
-            "details": "Create tables for components, versions, dependencies, and contracts. Store component name, version, description, author, timestamps, file locations, and validation results. Include indexes for fast lookups.",
+            "details": "Verify referenced file paths exist (theme.entry, tokens.root), validate framework and styleEngine against allowed values, check semantic version format, ensure token namespaces reference valid paths. Provide warnings for deprecated patterns.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Implement file storage system (local/cloud)",
-            "description": "Build abstracted file storage layer supporting both local filesystem and cloud storage",
+            "title": "Validate token namespaces",
+            "description": "Implement specific validation logic for token namespace definitions and their resolution paths",
             "dependencies": [
               4
             ],
-            "details": "Create storage interface with implementations for local disk and S3/GCS. Handle file organization by component/version. Implement cleanup for failed uploads. Support configurable storage backend.",
+            "details": "Parse token namespace definitions, verify namespace paths resolve to actual token files, validate token file formats (JSON, JS, DTCG), check for circular namespace references, ensure namespace naming conventions. Support different token formats.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 6,
-            "title": "Create component retrieval endpoints",
-            "description": "Build API endpoints for discovering and downloading registered components",
+            "title": "Create detailed error reporting with line numbers",
+            "description": "Build comprehensive error reporting system that shows exact error locations with line numbers and visual indicators",
             "dependencies": [
+              2,
+              3,
+              4,
               5
             ],
-            "details": "Implement GET /api/v1/components (list), GET /api/v1/components/:name/:version (metadata), GET /api/v1/components/:name/:version/download (file). Add filtering, pagination, and search capabilities.",
+            "details": "Create error formatter that shows file snippets with line numbers, highlight error locations with color coding, group related errors together, provide error summaries with counts. Include source file preview around error locations for context.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 7,
-            "title": "Build version resolution logic",
-            "description": "Implement intelligent version resolution for component dependencies",
+            "title": "Build actionable error messages and fix suggestions",
+            "description": "Enhance error messages with specific suggestions for how to fix common validation issues",
             "dependencies": [
               6
             ],
-            "details": "Support version ranges (^1.0.0, ~2.1.0, >=3.0.0). Resolve compatible versions based on dependency graph. Handle circular dependencies. Provide clear resolution explanations.",
+            "details": "Create error message templates with fix suggestions, detect common mistakes and provide targeted advice, suggest valid values for enum fields, provide examples of correct syntax. Include links to documentation for complex issues.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 8,
-            "title": "Add comprehensive error handling and validation",
-            "description": "Implement robust error handling across all registration workflow steps",
+            "title": "Performance testing and optimization",
+            "description": "Optimize validation performance to meet sub-100ms target for typical design-system.toml files",
             "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
               7
             ],
-            "details": "Create custom exception types for validation, storage, and conflict errors. Implement transaction rollback for failed registrations. Add detailed error messages and recovery suggestions. Include request validation middleware.",
+            "details": "Profile validation performance, optimize file system operations with async/await, implement validation caching for repeated checks, parallelize independent validation steps where possible. Add performance metrics to verbose output mode.",
             "status": "pending",
             "testStrategy": ""
           }
@@ -530,64 +532,476 @@
       },
       {
         "id": 7,
-        "title": "Build Environment Management System",
-        "description": "Create the environment registration and capability management system with compatibility checking and validation.",
-        "details": "Implement POST /api/v1/environments endpoint for environment registration. Create capability declaration and validation system. Implement GET /api/v1/environments/{id}/capabilities endpoint. Add environment compatibility checking against component contracts. Implement environment versioning and update mechanisms. Create capability matching algorithms for contract satisfaction. Add environment health checking and status monitoring. Implement environment deregistration and cleanup procedures.",
-        "testStrategy": "Environment registration tests, capability validation tests, compatibility checking algorithm tests, environment lifecycle management tests, and capability matching accuracy verification.",
-        "priority": "high",
-        "dependencies": [
-          3,
-          5
-        ],
+        "title": "Create Token and Theme Resolution System",
+        "description": "Build system to resolve and validate token references and theme configurations from manifest specifications",
         "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Develop Mount Plan Generation Engine",
-        "description": "Implement the core mount plan generation logic that matches components with environments and creates execution strategies.",
-        "details": "Create mount plan generation algorithm that analyzes component contracts and environment capabilities. Implement compatibility scoring and ranking system. Add adapter injection logic for bridging capability gaps. Create wrapper generation for theme and token integration. Implement context provider setup strategies. Add performance optimization for plan generation. Create plan caching mechanism with invalidation strategies. Implement plan execution validation and error recovery.",
-        "testStrategy": "Mount plan generation algorithm tests, compatibility scoring accuracy tests, adapter injection validation, plan execution simulation tests, and performance benchmarking of plan generation.",
-        "priority": "high",
-        "dependencies": [
-          6,
-          7
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 9,
-        "title": "Implement Profile Management System",
-        "description": "Build the profile system for reusable mount plan templates with configuration management and versioning.",
-        "details": "Create profile data models with named configurations and environment snapshots. Implement profile creation from existing mount plans. Add profile versioning with semantic versioning. Create profile sharing and permission management. Implement profile validation against current environment capabilities. Add profile diff and merge capabilities. Create profile template system for common configurations. Implement profile import/export functionality with JSON format.",
-        "testStrategy": "Profile creation and versioning tests, profile validation tests, permission management tests, diff/merge functionality tests, and import/export format validation.",
-        "priority": "medium",
-        "dependencies": [
-          8
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Build Component Search and Discovery API",
-        "description": "Implement comprehensive search functionality with filtering, sorting, and metadata-based discovery for components.",
-        "details": "Implement GET /api/v1/components/search endpoint with query parameters. Add full-text search using Elasticsearch or PostgreSQL full-text search. Implement filtering by tags, author, version ranges, and contract requirements. Add sorting by popularity, creation date, and version. Implement pagination with cursor-based pagination for performance. Add search result caching and invalidation. Create search analytics and popularity tracking. Implement search suggestions and autocomplete functionality.",
-        "testStrategy": "Search functionality tests with various query types, filtering accuracy tests, pagination performance tests, search result relevance validation, and analytics tracking verification.",
-        "priority": "medium",
         "dependencies": [
           6
         ],
+        "priority": "medium",
+        "details": "Implement token resolution engine that: parses token files from specified root directory, handles cascade resolution mode, validates namespace references, resolves theme entry points and provider components, and validates theme variant availability. Support multiple token formats (JSON, JS, DTCG) and theme patterns (React Context, styled-components, CSS custom properties).",
+        "testStrategy": "Token resolution tests across different formats, theme provider validation tests, namespace resolution accuracy tests, and error handling for missing references",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create token file parser for JSON, JS, and DTCG formats",
+            "description": "Build a token file parser module that can read and parse design tokens from multiple file formats",
+            "dependencies": [],
+            "details": "Create a token file parser module that can read and parse design tokens from multiple file formats including JSON (.json), JavaScript (.js), and Design Token Community Group (DTCG) specification formats. The parser should handle format detection, validate token structure, normalize different formats into a consistent internal representation, and provide error handling for malformed token files. Include support for nested token objects, aliases/references between tokens, and metadata extraction from each format type.\n<info added on 2025-06-26T01:52:41.790Z>\nCreate a token file parser module that can read and parse design tokens from multiple file formats including JSON (.json), JavaScript (.js), and Design Token Community Group (DTCG) specification formats. The parser should handle format detection, validate token structure, normalize different formats into a consistent internal representation, and provide error handling for malformed token files. Include support for nested token objects, aliases/references between tokens, and metadata extraction from each format type.\n</info added on 2025-06-26T01:52:41.790Z>",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement token resolution engine with cascade mode",
+            "description": "Build the core token resolution engine that processes tokens in cascade mode for hierarchical token resolution",
+            "dependencies": [
+              1
+            ],
+            "details": "Create token resolution engine that processes tokens in cascade mode, handling inheritance hierarchies and token overrides. Implement cascading logic where child tokens inherit from parent tokens, handle token composition and merging, support default value fallbacks, and manage resolution order based on cascade priority. Include conflict resolution for duplicate token names and optimization for large token sets.",
+            "status": "pending",
+            "testStrategy": "Cascade resolution tests, token inheritance validation, conflict resolution scenarios, and performance tests with large token hierarchies"
+          },
+          {
+            "id": 3,
+            "title": "Build namespace reference validator",
+            "description": "Create validation system for token namespace references to ensure valid token paths and dependencies",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement namespace reference validation that checks token path validity, validates cross-namespace references, detects circular dependencies, ensures referenced tokens exist, and validates namespace naming conventions. Support nested namespace structures, provide detailed error messages for invalid references, and include validation for token aliases.",
+            "status": "pending",
+            "testStrategy": "Namespace path validation tests, circular dependency detection tests, cross-reference validation, and error message accuracy tests"
+          },
+          {
+            "id": 4,
+            "title": "Create theme entry point resolver",
+            "description": "Build resolver for theme entry points that identifies and validates theme configuration files and entry modules",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement theme entry point resolver that discovers theme configuration files, validates theme structure and metadata, resolves theme module exports, handles multiple entry point formats, and provides theme dependency mapping. Support common theme patterns like index files, theme manifests, and dynamic theme loading.",
+            "status": "pending",
+            "testStrategy": "Theme discovery tests, entry point validation, module resolution tests, and multi-format theme support validation"
+          },
+          {
+            "id": 5,
+            "title": "Implement theme provider component detection",
+            "description": "Create detection system for theme provider components across different UI frameworks and patterns",
+            "dependencies": [
+              4
+            ],
+            "details": "Build theme provider detection that identifies React Context providers, styled-components ThemeProvider, CSS-in-JS theme providers, and custom theme provider patterns. Support automatic provider injection, validate provider component APIs, handle provider composition, and detect theme consumer components.",
+            "status": "pending",
+            "testStrategy": "Provider detection tests across frameworks, API validation tests, provider composition scenarios, and consumer component detection accuracy"
+          },
+          {
+            "id": 6,
+            "title": "Build theme variant availability checker",
+            "description": "Create system to validate theme variant availability and compatibility across different theme configurations",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Implement theme variant checker that validates available theme variants, checks variant compatibility with components, ensures variant completeness, handles variant inheritance, and provides variant availability reporting. Support dark/light modes, brand variants, and custom theme variations.",
+            "status": "pending",
+            "testStrategy": "Variant availability tests, compatibility validation, inheritance scenarios, and variant completeness checks"
+          },
+          {
+            "id": 7,
+            "title": "Add support for multiple theme patterns",
+            "description": "Implement support for various theme implementation patterns including React Context, styled-components, and CSS custom properties",
+            "dependencies": [
+              5,
+              6
+            ],
+            "details": "Build multi-pattern theme support for React Context patterns, styled-components ThemeProvider, CSS custom properties, CSS-in-JS solutions, and design system specific patterns. Include pattern detection, automatic adaptation between patterns, and cross-pattern compatibility layers.",
+            "status": "pending",
+            "testStrategy": "Multi-pattern support tests, pattern detection accuracy, cross-pattern compatibility validation, and adaptation logic tests"
+          },
+          {
+            "id": 8,
+            "title": "Implement token alias and reference resolution",
+            "description": "Build comprehensive system for resolving token aliases and references including nested references and computed values",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create token alias resolution system that handles direct aliases, nested reference chains, computed token values, conditional references, and reference validation. Support DTCG alias syntax, custom alias patterns, reference cycle detection, and optimized resolution for performance.",
+            "status": "pending",
+            "testStrategy": "Alias resolution tests, nested reference scenarios, computed value validation, cycle detection tests, and performance benchmarks for complex reference chains"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Implement Layout System Validation",
+        "description": "Create validation logic for layout system configurations and responsive behavior definitions",
+        "status": "pending",
+        "dependencies": [
+          7
+        ],
+        "priority": "medium",
+        "details": "Build layout validation system that: validates layout system identifiers (grid-12, flexbox, custom), checks responsive configuration validity, validates breakpoint definitions, and ensures layout system compatibility with declared styleEngine. Include support for common layout systems and extensibility for custom configurations.",
+        "testStrategy": "Layout system validation tests, responsive configuration tests, styleEngine compatibility checks, and custom layout system support tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create layout system identifier validator",
+            "description": "Build validator to verify layout system identifiers match supported types and configurations",
+            "dependencies": [],
+            "details": "Implement validation logic for standard layout identifiers (grid-12, flexbox, custom), create schema for layout system definitions, validate identifier format and naming conventions, ensure identifier uniqueness within configurations",
+            "status": "pending",
+            "testStrategy": "Test identifier validation with valid/invalid inputs, schema compliance tests, identifier uniqueness checks"
+          },
+          {
+            "id": 2,
+            "title": "Build responsive configuration validator",
+            "description": "Create validator for responsive layout configurations and behavior definitions",
+            "dependencies": [],
+            "details": "Validate responsive configuration objects, check breakpoint-specific layout rules, ensure consistent responsive behavior patterns, validate media query integration points",
+            "status": "pending",
+            "testStrategy": "Responsive config validation tests, breakpoint consistency checks, media query validation"
+          },
+          {
+            "id": 3,
+            "title": "Implement breakpoint definition validator",
+            "description": "Build validation system for breakpoint definitions including values, naming, and ordering",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Validate breakpoint value formats and units, ensure logical breakpoint ordering, check naming convention compliance, validate breakpoint ranges for overlaps",
+            "status": "pending",
+            "testStrategy": "Breakpoint value validation, ordering logic tests, naming convention checks, overlap detection tests"
+          },
+          {
+            "id": 4,
+            "title": "Create styleEngine compatibility checker",
+            "description": "Implement compatibility validation between layout systems and declared style engines",
+            "dependencies": [
+              3
+            ],
+            "details": "Build compatibility matrix for layout/engine combinations, validate feature support between systems, check for incompatible configuration combinations, provide compatibility warnings and suggestions",
+            "status": "pending",
+            "testStrategy": "Compatibility matrix tests, feature support validation, incompatibility detection tests"
+          },
+          {
+            "id": 5,
+            "title": "Build grid system configuration validator",
+            "description": "Create specialized validator for CSS Grid layout system configurations",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Validate grid column/row definitions, check grid template configurations, ensure proper grid area naming, validate grid gap and alignment properties",
+            "status": "pending",
+            "testStrategy": "Grid configuration validation tests, template syntax checks, grid area validation"
+          },
+          {
+            "id": 6,
+            "title": "Implement flexbox layout validator",
+            "description": "Build validator for flexbox layout system configurations and properties",
+            "dependencies": [
+              1,
+              2,
+              5
+            ],
+            "details": "Validate flexbox direction and wrap configurations, check flex item sizing properties, ensure proper alignment and justification settings, validate flex container hierarchy",
+            "status": "pending",
+            "testStrategy": "Flexbox property validation, container hierarchy tests, alignment configuration checks"
+          },
+          {
+            "id": 7,
+            "title": "Add custom layout system support",
+            "description": "Implement validation framework for custom layout system definitions and extensions",
+            "dependencies": [
+              1,
+              6
+            ],
+            "details": "Create extensible validation schema for custom layouts, implement plugin architecture for custom validators, provide validation helpers for common custom patterns, ensure custom system registration and discovery",
+            "status": "pending",
+            "testStrategy": "Custom layout validation tests, plugin registration tests, schema extension validation"
+          },
+          {
+            "id": 8,
+            "title": "Create layout system test suite",
+            "description": "Build comprehensive test coverage for all layout validation components",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "details": "Create unit tests for all validators, build integration test scenarios for complex configurations, implement performance benchmarks for validation operations, develop test fixtures for common layout patterns",
+            "status": "pending",
+            "testStrategy": "Unit test coverage for validators, integration tests, performance benchmarks, fixture validation"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Build Registry Integration Interface",
+        "description": "Create the interface layer that allows the Contract-Driven Component Registry to consume design-system.toml files",
+        "status": "pending",
+        "dependencies": [
+          8
+        ],
+        "priority": "high",
+        "details": "Implement registry integration module that: exports TOML parsing utilities for registry consumption, provides capability checking functions against component contracts, creates theme provider injection helpers, and supports token/theme lookup for component previews. Ensure sub-100ms performance target for registry operations.",
+        "testStrategy": "Registry integration tests, capability checking accuracy tests, performance benchmarks for registry operations, and theme injection validation",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Export TOML parsing utilities for registry",
+            "description": "Create and export TOML parsing utilities specifically designed for registry consumption of design-system.toml files",
+            "dependencies": [],
+            "details": "Build dedicated TOML parser with registry-specific optimizations, export parsing functions for different sections (tokens, components, themes), implement error handling for malformed TOML, and create validation utilities for required registry fields",
+            "status": "pending",
+            "testStrategy": "TOML parsing accuracy tests, malformed file handling tests, performance benchmarks for parsing speed"
+          },
+          {
+            "id": 2,
+            "title": "Create capability checking functions",
+            "description": "Implement functions to check component capabilities and compatibility against registry contracts",
+            "dependencies": [
+              1
+            ],
+            "details": "Build capability detection algorithms, create contract validation functions, implement compatibility matrix checking, handle version compatibility checks, and provide detailed capability reports for registry decision-making",
+            "status": "pending",
+            "testStrategy": "Capability detection accuracy tests, contract validation tests, compatibility matrix verification"
+          },
+          {
+            "id": 3,
+            "title": "Build theme provider injection helpers",
+            "description": "Create helper functions to inject theme providers and handle theme context for registry components",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement theme provider factory functions, create context injection utilities, handle multiple theme provider scenarios, support theme switching mechanisms, and ensure proper theme inheritance for nested components",
+            "status": "pending",
+            "testStrategy": "Theme injection tests, context inheritance validation, multi-theme scenario testing"
+          },
+          {
+            "id": 4,
+            "title": "Implement token/theme lookup for previews",
+            "description": "Build efficient token and theme lookup system for component previews in the registry",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Create fast token resolution algorithms, implement theme value lookup with fallbacks, build preview-specific token mapping, handle dynamic token resolution, and optimize for preview rendering performance",
+            "status": "pending",
+            "testStrategy": "Token lookup performance tests, theme resolution accuracy tests, preview rendering validation"
+          },
+          {
+            "id": 5,
+            "title": "Create registry adapter interface",
+            "description": "Build the main adapter interface that connects all registry integration components together",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Design unified registry adapter API, implement component registration workflows, create registry event handling, build adapter lifecycle management, and ensure consistent interface across all registry operations",
+            "status": "pending",
+            "testStrategy": "Adapter interface compliance tests, integration workflow validation, lifecycle management testing"
+          },
+          {
+            "id": 6,
+            "title": "Optimize for sub-100ms performance",
+            "description": "Implement performance optimizations to ensure all registry operations complete within 100ms target",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Profile all registry operations, implement lazy loading strategies, optimize parsing algorithms, add performance monitoring, create benchmarking utilities, and implement caching where appropriate to meet sub-100ms targets",
+            "status": "pending",
+            "testStrategy": "Performance benchmark tests, sub-100ms validation, memory usage optimization tests"
+          },
+          {
+            "id": 7,
+            "title": "Add caching layer for registry operations",
+            "description": "Implement intelligent caching system to improve registry performance and reduce redundant operations",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              6
+            ],
+            "details": "Build multi-level caching system for parsed TOML, capability results, and theme lookups. Implement cache invalidation strategies, handle cache warming for popular components, create cache hit rate monitoring, and ensure cache consistency across registry operations",
+            "status": "pending",
+            "testStrategy": "Cache performance tests, invalidation strategy validation, consistency verification, hit rate optimization tests"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Create Documentation and CLI Help System",
+        "description": "Build comprehensive documentation, CLI help system, and getting started guides for DSM tool adoption",
+        "status": "pending",
+        "dependencies": [
+          9
+        ],
+        "priority": "medium",
+        "details": "Create comprehensive documentation including: CLI command reference with examples, TOML schema documentation with field descriptions, integration guides for common frameworks (React + Tailwind, React + Emotion), troubleshooting guides for common issues, and example design-system.toml files for different DS patterns. Implement rich CLI help with command-specific guidance and colored output.",
+        "testStrategy": "Documentation accuracy validation, CLI help completeness tests, example file validation, and user journey testing for first-time adoption",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create CLI command reference documentation",
+            "description": "Build comprehensive documentation for all CLI commands with usage examples and parameter descriptions",
+            "dependencies": [],
+            "details": "Create detailed documentation for all DSM CLI commands including syntax, parameters, options, examples, and common use cases. Include markdown formatting and cross-references between related commands.",
+            "status": "pending",
+            "testStrategy": "Validate documentation completeness against actual CLI implementation, test all examples for accuracy"
+          },
+          {
+            "id": 2,
+            "title": "Build TOML schema documentation with examples",
+            "description": "Create comprehensive documentation for the design-system.toml configuration file format",
+            "dependencies": [
+              1
+            ],
+            "details": "Document all TOML schema fields, data types, validation rules, and provide annotated examples. Include best practices for organizing design tokens and configuration patterns for different design system architectures.",
+            "status": "pending",
+            "testStrategy": "Validate schema examples against actual parser, ensure all documented fields are accurate"
+          },
+          {
+            "id": 3,
+            "title": "Write integration guides for React+Tailwind and React+Emotion",
+            "description": "Create step-by-step integration guides for popular React styling frameworks",
+            "dependencies": [
+              2
+            ],
+            "details": "Build detailed guides showing how to integrate DSM with React+Tailwind CSS and React+Emotion setups. Include setup instructions, configuration examples, code generation patterns, and migration strategies from existing design systems.",
+            "status": "pending",
+            "testStrategy": "Test integration steps in sample projects, validate code examples work correctly"
+          },
+          {
+            "id": 4,
+            "title": "Implement rich CLI help with colored output",
+            "description": "Build an enhanced CLI help system with syntax highlighting and interactive elements",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Implement colored output for CLI help using terminal colors, create command-specific help pages, add usage examples with syntax highlighting, and implement help command with subcommand navigation. Include ASCII art and formatting for better readability.",
+            "status": "pending",
+            "testStrategy": "Test help output across different terminals, validate color support detection"
+          },
+          {
+            "id": 5,
+            "title": "Create troubleshooting guides for common issues",
+            "description": "Build comprehensive troubleshooting documentation for frequently encountered problems",
+            "dependencies": [
+              4
+            ],
+            "details": "Document common error messages with solutions, create debugging guides for configuration issues, include FAQ section for setup problems, and provide diagnostic commands for self-service troubleshooting. Include platform-specific issues and solutions.",
+            "status": "pending",
+            "testStrategy": "Test troubleshooting steps with actual error scenarios, validate solution effectiveness"
+          },
+          {
+            "id": 6,
+            "title": "Build example design-system.toml files",
+            "description": "Create a collection of example configuration files for different design system patterns",
+            "dependencies": [
+              5
+            ],
+            "details": "Build example TOML files for Material Design, Bootstrap-style, minimal design systems, and enterprise patterns. Include commented examples explaining design decisions, token organization strategies, and scaling approaches for different team sizes.",
+            "status": "pending",
+            "testStrategy": "Validate all example files parse correctly, test generated output quality"
+          },
+          {
+            "id": 7,
+            "title": "Add interactive help system with prompts",
+            "description": "Implement an interactive CLI help system that guides users through common workflows",
+            "dependencies": [
+              2,
+              6
+            ],
+            "details": "Create interactive help prompts for first-time setup, implement guided workflows for common tasks like adding new tokens or generating components, and build a tutorial mode with step-by-step instructions. Include progress indicators and contextual help.",
+            "status": "pending",
+            "testStrategy": "Test interactive flows for usability, validate prompt logic and user experience"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-26T01:39:56.585Z",
+      "updated": "2025-06-26T01:42:09.679Z",
+      "description": "Tasks for DSM context"
+    }
+  },
+  "registry": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Initialize Project Foundation and Core Data Models",
+        "description": "Set up the project repository with TypeScript, create core data models for Components, Contracts, Environments, and Adapters with health scoring system.",
+        "details": "Initialize TypeScript project with proper tsconfig, package.json, and folder structure. Implement core interfaces: Component (with versioning, health scoring), Contract (v3 schema with visual intents), Environment (capability declarations), Adapter (with performance metrics). Create base types for HealthScore, CompatibilityScore, AdapterMetrics. Set up testing framework (Jest/Vitest) and establish code quality tools (ESLint, Prettier). Implement semantic versioning utilities and basic validation schemas using Zod or similar.",
+        "testStrategy": "Unit tests for all data model interfaces, validation schema tests, mock data generation for testing, integration tests for model interactions.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Contract Schema v3 with Visual Intent System",
+        "description": "Build the complete Contract schema v3 implementation with visual intent assertions, theme management, and token namespace resolution.",
+        "details": "Implement Contract interface with theme variants (light/dark/high-contrast), token namespace hierarchical resolution system, layout system specifications (grid-12, flexbox fallbacks), style engine support (Tailwind, CSS-in-JS, CSS Modules). Build VisualIntent system with categories (surface, interactive, decorative, structural), characteristics (border, padding, elevation, animation), and VisualAssertion framework with viewport configurations, threshold settings, and comparison modes (pixel, perceptual, layout). Create contract validation engine with compatibility checking.",
+        "testStrategy": "Schema validation tests, contract parsing tests, visual intent assertion validation, namespace resolution testing, theme variant compatibility tests.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 11,
-        "title": "Create CLI Tool Foundation",
-        "description": "Build the command-line interface tool for component management, registration, and local development workflows.",
-        "details": "Create CLI application using 'commander.js' with TypeScript. Implement configuration management with local .registryrc file. Add authentication commands for API access. Create component scaffolding commands with templates. Implement component validation commands for local testing. Add registry interaction commands (publish, search, install). Create local development server for component testing. Implement profile management commands. Add verbose logging and debug modes.",
-        "testStrategy": "CLI command execution tests, configuration management tests, authentication flow tests, scaffolding template validation, and local development server functionality tests.",
+        "id": 3,
+        "title": "Build Adapter System Architecture with Performance Metrics",
+        "description": "Create the adapter framework that bridges capability gaps between components and environments with comprehensive performance and security monitoring.",
+        "details": "Implement ComponentAdapter interface with mount/unmount lifecycle, performance metrics collection (mountLatency, renderOverhead, memoryFootprint, cpuUsage, errorRate), and security risk assessment. Build AdapterRegistry for adapter discovery and chain calculation. Create adapter types for common gaps: grid-to-flex, theme converters, token resolvers. Implement PerformanceCost estimation algorithms and SecurityMetrics evaluation. Design adapter chaining logic with cost optimization and fallback strategies.",
+        "testStrategy": "Adapter lifecycle tests, performance metrics collection validation, security assessment tests, chain calculation algorithm tests, adapter registry CRUD operations.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Compatibility Scoring Algorithm",
+        "description": "Develop the three-stage compatibility matching algorithm with strict version matching, feature detection, and fallback resolution.",
+        "details": "Build CompatibilityScore calculation engine with weighted scoring (required: 70%, optional: 20%, performance: 10%). Implement Stage 1: Strict version matching with SemVer compliance. Stage 2: Feature detection with adapter availability checking and performance cost calculation. Stage 3: Fallback resolution with degraded experience warnings and user-configurable tolerance levels. Create compatibility prediction algorithms and confidence level assessment (high/medium/low).",
+        "testStrategy": "Compatibility scoring algorithm tests with various scenarios, version matching validation, feature detection accuracy tests, fallback resolution strategy tests.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Create Token Management System with Namespace Hierarchy",
+        "description": "Build the hierarchical token management system with cascade resolution, inheritance, and multi-platform translation capabilities.",
+        "details": "Implement token namespace hierarchy (global.color.primary -> theme.dark.color.primary -> component.button.color.primary -> profile.custom.color.primary). Build resolution strategy with priority order: Profile-specific -> Component-specific -> Theme -> Global defaults. Create token composition system with references ({ref: 'global.brand.primary'}), transform functions (darken(), opacity(), scale()), and CSS custom property inheritance. Implement runtime token hot-swapping and multi-platform translation (web, iOS, Android).",
+        "testStrategy": "Namespace resolution tests, token inheritance validation, composition system tests, transform function accuracy, hot-swapping functionality tests.",
         "priority": "medium",
         "dependencies": [
           2
@@ -596,151 +1010,326 @@
         "subtasks": []
       },
       {
-        "id": 12,
-        "title": "Implement Component Validation and Testing Framework",
-        "description": "Build automated validation system for component contracts, visual regression testing, and compatibility checking.",
-        "details": "Create contract validation pipeline with detailed error reporting. Implement visual regression testing using Playwright or Chromatic. Add accessibility testing integration with axe-core. Create performance benchmarking for component rendering. Implement cross-browser compatibility testing. Add component isolation testing in different environments. Create test report generation with visual diff capabilities. Implement automated test execution in CI/CD pipelines.",
-        "testStrategy": "Contract validation accuracy tests, visual regression detection tests, accessibility compliance verification, performance benchmark reliability tests, and CI/CD integration tests.",
-        "priority": "medium",
+        "id": 6,
+        "title": "Build Mount Plan Generator and Execution System",
+        "description": "Implement the mount plan generation system with support for static, interactive, and isolated execution modes, including diffing capabilities.",
+        "details": "Create MountPlan data structure with environment-component compatibility scores, execution mode specifications (static/interactive/isolated), adapter chains, context provider setup, and token resolution strategies. Implement MountPlanGenerator with AI-assisted suggestions, performance estimation, and alternative plan generation. Build MountPlanDiffer for comparing plans with added/removed/modified entries, conflict detection, and impact assessment (performance, security, visual). Create execution modes with security sandboxing, resource quotas, and isolation levels.",
+        "testStrategy": "Mount plan generation tests, execution mode validation, diffing algorithm accuracy tests, security sandbox tests, resource quota enforcement validation.",
+        "priority": "high",
         "dependencies": [
-          8,
-          11
+          4,
+          5
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 13,
-        "title": "Build Token Management and Governance System",
-        "description": "Implement token package management with versioning, compliance tracking, and governance workflows.",
-        "details": "Create token package registration and versioning system. Implement token usage tracking across components. Add token compliance validation and reporting. Create token deprecation and migration workflows. Implement token conflict detection and resolution. Add token governance approval workflows. Create token usage analytics and reporting dashboard. Implement token update propagation and impact analysis.",
-        "testStrategy": "Token versioning tests, usage tracking accuracy tests, compliance validation tests, governance workflow tests, and analytics reporting verification.",
+        "id": 7,
+        "title": "Implement Component Health Scoring System",
+        "description": "Build comprehensive health scoring system with performance, reliability, security, compatibility, accessibility, and documentation metrics.",
+        "details": "Implement ComponentHealthScore calculation with overall score (0-100) and breakdown categories: performance (load times, render metrics), reliability (error rates, crash frequency), security (vulnerability scanning, dependency health), compatibility (environment support, adapter requirements), accessibility (WCAG compliance, screen reader support), documentation (completeness, accuracy). Build HealthFactor system with weighted scoring, trend analysis (improving/stable/degrading), and recommendation generation. Create automated health monitoring with periodic recalculation.",
+        "testStrategy": "Health score calculation accuracy tests, metric collection validation, trend analysis tests, recommendation system validation, automated monitoring functionality tests.",
         "priority": "medium",
         "dependencies": [
-          3,
+          1,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Create Visual Regression Pipeline with Baseline Management",
+        "description": "Build the visual regression testing system with screenshot capture, diff algorithms, and baseline management across different profiles.",
+        "details": "Implement VisualRegressionConfig with baseline storage options (local/s3/registry), comparison algorithms (pixel/perceptual/structural), and update strategies (manual/auto-approve/threshold). Create screenshot capture pipeline with viewport configurations, ignore regions for dynamic content, and multiple comparison modes. Build baseline management system with per-profile baselines, version tracking, and automated baseline updates. Implement reporting system with HTML/JSON/markdown formats, diff image generation, and notification channels integration.",
+        "testStrategy": "Screenshot capture accuracy tests, diff algorithm validation, baseline management CRUD tests, reporting format generation tests, notification system integration tests.",
+        "priority": "medium",
+        "dependencies": [
+          2,
           6
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 14,
-        "title": "Develop Local Development Server",
-        "description": "Create a local development server for component testing with hot reloading, profile switching, and real-time validation.",
-        "details": "Build development server using Vite with React support. Implement hot module replacement for components. Add profile switching interface for testing different environments. Create real-time contract validation with error overlay. Implement component isolation and preview modes. Add debugging tools for mount plan inspection. Create component story generation and management. Implement live reloading when contracts or profiles change.",
-        "testStrategy": "Development server startup tests, hot reloading functionality tests, profile switching tests, real-time validation tests, and component isolation verification.",
+        "id": 9,
+        "title": "Build Registry API with Authentication and Authorization",
+        "description": "Implement the component registry API with role-based access control, namespace management, and component visibility settings.",
+        "details": "Create Registry API with CRUD operations for components, contracts, environments, and adapters. Implement Role-based access control (OWNER, MAINTAINER, CONTRIBUTOR, CONSUMER, AUDITOR) with namespace-scoped permissions. Build component visibility system (PUBLIC, ORGANIZATION, TEAM, PRIVATE, EXPERIMENTAL, DEPRECATED) with access validation. Create authentication middleware with JWT tokens, API key management, and session handling. Implement authorization checks for all registry operations with audit logging.",
+        "testStrategy": "API endpoint tests for all CRUD operations, authentication middleware tests, authorization validation tests, role-based access tests, audit logging verification.",
+        "priority": "high",
+        "dependencies": [
+          1,
+          7
+        ],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design profile schema and data structures",
+            "description": "Define the TypeScript interfaces and database schema for profiles including fields for name, description, mount configurations, metadata, and relationships",
+            "dependencies": [],
+            "details": "Create comprehensive data models that support all profile features including versioning, permissions, and mount plan references",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement profile storage with Prisma",
+            "description": "Create Prisma models for profiles, configure database migrations, and set up basic CRUD operations",
+            "dependencies": [
+              1
+            ],
+            "details": "Design tables for profiles, profile_versions, profile_permissions, and profile_mount_plans with proper relationships and indexes",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build profile creation from mount plans",
+            "description": "Implement functionality to create profiles by selecting and combining existing mount plan configurations",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Allow users to select multiple mount plans, configure them, and save as a reusable profile with custom metadata",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Add SemVer versioning system",
+            "description": "Implement semantic versioning for profiles with automatic version bumping based on change types",
+            "dependencies": [
+              2
+            ],
+            "details": "Support major.minor.patch versioning, track version history, and implement version comparison utilities",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create version history tracking",
+            "description": "Build system to maintain complete version history with changesets and rollback capabilities",
+            "dependencies": [
+              4
+            ],
+            "details": "Store version metadata, change descriptions, timestamps, and authors for each profile version",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Design permissions model",
+            "description": "Create flexible permissions system supporting owner, editor, and viewer roles for profiles",
+            "dependencies": [
+              2
+            ],
+            "details": "Define permission levels, inheritance rules, and access control patterns for profile management",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement profile sharing functionality",
+            "description": "Build features to share profiles with other users and teams with configurable permissions",
+            "dependencies": [
+              6
+            ],
+            "details": "Support sharing via links, user/team assignments, and public/private visibility settings",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Create environment validation framework",
+            "description": "Build validation system to check profile compatibility with target environments",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Validate mount paths, dependencies, resource requirements, and configuration constraints",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Implement validation rules engine",
+            "description": "Create extensible rules engine for custom validation logic per environment type",
+            "dependencies": [
+              8
+            ],
+            "details": "Support rule definitions, custom validators, and validation result reporting with detailed error messages",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Build profile diff algorithm",
+            "description": "Implement efficient diffing algorithm to compare two profile versions or profiles",
+            "dependencies": [
+              1,
+              5
+            ],
+            "details": "Generate structured diff output showing additions, deletions, and modifications at all levels",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Create merge functionality",
+            "description": "Build intelligent merge system to combine profiles or resolve conflicts between versions",
+            "dependencies": [
+              10
+            ],
+            "details": "Support automatic merging for non-conflicting changes and manual conflict resolution UI",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Design JSON export format",
+            "description": "Create comprehensive JSON schema for profile export including all metadata and configurations",
+            "dependencies": [
+              1
+            ],
+            "details": "Define portable format supporting versioning, dependencies, and complete profile reconstruction",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 13,
+            "title": "Implement export functionality",
+            "description": "Build export system to serialize profiles to JSON with optional dependency bundling",
+            "dependencies": [
+              12
+            ],
+            "details": "Support selective export, compression options, and metadata inclusion/exclusion settings",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 14,
+            "title": "Build import parser and validator",
+            "description": "Create robust import system with JSON validation and conflict detection",
+            "dependencies": [
+              12,
+              8
+            ],
+            "details": "Parse imported profiles, validate against schema, check for conflicts, and handle dependencies",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 15,
+            "title": "Add profile dependency management",
+            "description": "Implement system to track and manage dependencies between profiles and mount plans",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Handle circular dependencies, version constraints, and dependency resolution",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 16,
+            "title": "Create profile API endpoints",
+            "description": "Build RESTful API endpoints for all profile operations with proper authentication",
+            "dependencies": [
+              2,
+              6,
+              7
+            ],
+            "details": "Implement CRUD operations, sharing endpoints, version management, and bulk operations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 17,
+            "title": "Implement profile caching layer",
+            "description": "Add Redis caching for frequently accessed profiles and validation results",
+            "dependencies": [
+              16
+            ],
+            "details": "Cache profile data, permissions, and validation results with intelligent invalidation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 18,
+            "title": "Build profile audit logging",
+            "description": "Create comprehensive audit trail for all profile operations and access",
+            "dependencies": [
+              2,
+              16
+            ],
+            "details": "Log profile creation, updates, sharing, access attempts, and administrative actions",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 19,
+            "title": "Add profile search and filtering",
+            "description": "Implement advanced search capabilities for profiles with metadata and content filtering",
+            "dependencies": [
+              2,
+              16
+            ],
+            "details": "Support full-text search, tag-based filtering, and complex query combinations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 20,
+            "title": "Create comprehensive test suite",
+            "description": "Build unit and integration tests covering all profile functionality",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19
+            ],
+            "details": "Write tests for data models, API endpoints, validation, versioning, permissions, and import/export",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Develop CLI Tool with Profile Management",
+        "description": "Build comprehensive CLI tool for component management, profile configuration, and developer workflow automation with AI-assisted features.",
+        "details": "Create CLI with commands for component lifecycle (create, publish, update, deprecate), contract validation, environment testing, and profile management. Implement profile system with named configuration sets, environment snapshots, token version locks, theme specifications, and inheritance hierarchy. Build AI-assisted features: mount plan suggestions, compatibility predictions, optimization recommendations. Create developer workflow automation: hot reload for local development, automatic contract generation, visual regression integration, and performance monitoring dashboard.",
+        "testStrategy": "CLI command functionality tests, profile management validation, AI assistant integration tests, developer workflow automation tests, hot reload system validation.",
         "priority": "medium",
         "dependencies": [
-          11,
-          12
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 15,
-        "title": "Implement GitHub Actions CI/CD Integration",
-        "description": "Build comprehensive CI/CD integration with automated validation, visual regression testing, and deployment workflows.",
-        "details": "Create GitHub Actions workflows for component validation. Implement PR comment automation with contract diffs and validation results. Add visual regression testing integration with artifact storage. Create automated version bumping based on contract changes. Implement security scanning for component packages. Add performance regression detection. Create deployment automation for approved components. Implement rollback mechanisms for failed deployments.",
-        "testStrategy": "CI/CD workflow execution tests, PR automation tests, visual regression pipeline tests, version bumping accuracy tests, and deployment rollback verification.",
-        "priority": "medium",
-        "dependencies": [
-          12
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 16,
-        "title": "Build Analytics and Reporting Dashboard",
-        "description": "Create comprehensive analytics dashboard for component usage, registry health, and governance metrics.",
-        "details": "Build React-based dashboard with real-time metrics. Implement component usage analytics with download tracking. Create registry health monitoring with uptime and performance metrics. Add governance compliance reporting with violation tracking. Implement user activity analytics and adoption metrics. Create custom report generation with export capabilities. Add alerting system for critical metrics. Implement data visualization with charts and graphs.",
-        "testStrategy": "Dashboard functionality tests, analytics accuracy tests, real-time metrics validation, report generation tests, and alerting system verification.",
-        "priority": "low",
-        "dependencies": [
-          10,
-          13
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 17,
-        "title": "Implement Advanced Governance Features",
-        "description": "Build enterprise governance features including approval workflows, audit trails, and compliance enforcement.",
-        "details": "Create component approval workflows with role-based access control. Implement audit trail logging for all registry operations. Add compliance policy enforcement with automatic validation. Create governance dashboard for administrators. Implement component lifecycle management with retirement workflows. Add bulk operations for governance actions. Create governance reporting with compliance metrics. Implement policy templates and configuration management.",
-        "testStrategy": "Approval workflow tests, audit trail accuracy tests, compliance enforcement tests, role-based access control tests, and governance reporting verification.",
-        "priority": "low",
-        "dependencies": [
-          13,
-          16
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 18,
-        "title": "Build Migration Tools and Utilities",
-        "description": "Create tools for migrating existing component libraries to the contract-driven registry system.",
-        "details": "Build migration CLI tool for existing component libraries. Implement contract generation from existing components. Create component analysis tools for dependency extraction. Add batch migration capabilities with progress tracking. Implement rollback mechanisms for failed migrations. Create migration validation and testing tools. Add migration reporting with success/failure analysis. Implement compatibility checking for migrated components.",
-        "testStrategy": "Migration tool functionality tests, contract generation accuracy tests, batch migration tests, rollback mechanism tests, and migration validation verification.",
-        "priority": "low",
-        "dependencies": [
-          11,
-          14
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 19,
-        "title": "Create Documentation Portal and Developer Resources",
-        "description": "Build comprehensive documentation portal with API docs, tutorials, and developer resources for the registry system.",
-        "details": "Create documentation website using Next.js or Docusaurus. Implement auto-generated API documentation from OpenAPI specs. Add interactive tutorials and getting started guides. Create component showcase with live examples. Implement search functionality for documentation. Add community contribution guidelines and templates. Create video tutorials and screencasts. Implement documentation versioning and translation support.",
-        "testStrategy": "Documentation site functionality tests, API documentation accuracy tests, tutorial completion tests, search functionality tests, and accessibility compliance verification.",
-        "priority": "low",
-        "dependencies": [
-          11,
-          14
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 20,
-        "title": "Implement Performance Optimization and Monitoring",
-        "description": "Add comprehensive performance monitoring, caching strategies, and optimization features for production deployment.",
-        "details": "Implement Redis caching for frequently accessed data. Add CDN integration for component package distribution. Create database query optimization with connection pooling. Implement API response caching with intelligent invalidation. Add performance monitoring with metrics collection. Create load balancing and horizontal scaling support. Implement rate limiting and DDoS protection. Add performance benchmarking and alerting systems.",
-        "testStrategy": "Performance benchmarking tests, caching effectiveness tests, CDN distribution tests, load balancing tests, and monitoring system accuracy verification.",
-        "priority": "medium",
-        "dependencies": [
-          5,
           8,
-          10
+          9
         ],
         "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 21,
-        "title": "Design System Manifest (DSM) - Create TOML-based manifest for capturing Design System exports to Contract-Driven Component Registry",
-        "description": "Implement a TOML-based manifest system for defining and exporting design system components, tokens, and configurations to the contract-driven registry with automatic contract generation. This implementation will be tagged as 'DSM' for the Design System Manifest deliverable.",
-        "status": "pending",
-        "dependencies": [
-          3,
-          6,
-          11
-        ],
-        "priority": "medium",
-        "details": "Create DSM parser and validator for TOML manifest files with 'DSM' tag designation. Define manifest schema with sections for: components (with props, variants, states), design tokens (colors, typography, spacing, etc.), theme configurations, and export metadata. Implement manifest-to-contract transformer that generates component contracts from DSM definitions. Add support for design token inheritance and composition. Create manifest validation with schema enforcement and error reporting. Implement export pipeline that packages components with generated contracts under the DSM tag. Add support for component dependencies and peer requirements in manifest. Create manifest versioning system with migration support. Implement design token transformation for different platforms (CSS, JS, iOS, Android). Add manifest CLI tool for validation, export, and contract generation with DSM tagging. Create manifest documentation generator for design system docs. Implement manifest diffing for change detection between versions.",
-        "testStrategy": "TOML parsing and validation tests for various manifest formats, contract generation accuracy tests from manifest definitions, design token transformation tests for all platforms, manifest versioning and migration tests, export pipeline integration tests with DSM tag verification, dependency resolution tests, CLI tool functionality tests, and manifest diffing accuracy verification.",
         "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-06-25T19:10:17.650Z",
-      "updated": "2025-06-26T01:36:44.135Z",
-      "description": "Tasks for master context"
+      "created": "2025-06-26T02:39:25.918Z",
+      "updated": "2025-06-26T02:42:32.113Z",
+      "description": "Tasks for registry context"
     }
   }
 }

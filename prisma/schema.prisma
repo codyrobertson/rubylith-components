@@ -12,6 +12,29 @@ datasource db {
 }
 
 // =============================================================================
+// User and Authentication Models
+// =============================================================================
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String   // hashed password
+  firstName   String?
+  lastName    String?
+  role        UserRole @default(CONSUMER)
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Indexes
+  @@index([email])
+  @@index([role])
+}
+
+// =============================================================================
 // Core Models
 // =============================================================================
 
@@ -432,4 +455,12 @@ enum ProfilePermission {
   WRITE
   EXECUTE
   ADMIN
+}
+
+enum UserRole {
+  OWNER
+  MAINTAINER
+  CONTRIBUTOR
+  CONSUMER
+  AUDITOR
 }

@@ -1,0 +1,55 @@
+# Task ID: 10
+# Title: Create Documentation and CLI Help System
+# Status: pending
+# Dependencies: 9
+# Priority: medium
+# Description: Build comprehensive documentation, CLI help system, and getting started guides for DSM tool adoption
+# Details:
+Create comprehensive documentation including: CLI command reference with examples, TOML schema documentation with field descriptions, integration guides for common frameworks (React + Tailwind, React + Emotion), troubleshooting guides for common issues, and example design-system.toml files for different DS patterns. Implement rich CLI help with command-specific guidance and colored output.
+
+# Test Strategy:
+Documentation accuracy validation, CLI help completeness tests, example file validation, and user journey testing for first-time adoption
+
+# Subtasks:
+## 1. Create CLI command reference documentation [pending]
+### Dependencies: None
+### Description: Build comprehensive documentation for all CLI commands with usage examples and parameter descriptions
+### Details:
+Create detailed documentation for all DSM CLI commands including syntax, parameters, options, examples, and common use cases. Include markdown formatting and cross-references between related commands.
+
+## 2. Build TOML schema documentation with examples [pending]
+### Dependencies: 10.1
+### Description: Create comprehensive documentation for the design-system.toml configuration file format
+### Details:
+Document all TOML schema fields, data types, validation rules, and provide annotated examples. Include best practices for organizing design tokens and configuration patterns for different design system architectures.
+
+## 3. Write integration guides for React+Tailwind and React+Emotion [pending]
+### Dependencies: 10.2
+### Description: Create step-by-step integration guides for popular React styling frameworks
+### Details:
+Build detailed guides showing how to integrate DSM with React+Tailwind CSS and React+Emotion setups. Include setup instructions, configuration examples, code generation patterns, and migration strategies from existing design systems.
+
+## 4. Implement rich CLI help with colored output [pending]
+### Dependencies: 10.2, 10.3
+### Description: Build an enhanced CLI help system with syntax highlighting and interactive elements
+### Details:
+Implement colored output for CLI help using terminal colors, create command-specific help pages, add usage examples with syntax highlighting, and implement help command with subcommand navigation. Include ASCII art and formatting for better readability.
+
+## 5. Create troubleshooting guides for common issues [pending]
+### Dependencies: 10.4
+### Description: Build comprehensive troubleshooting documentation for frequently encountered problems
+### Details:
+Document common error messages with solutions, create debugging guides for configuration issues, include FAQ section for setup problems, and provide diagnostic commands for self-service troubleshooting. Include platform-specific issues and solutions.
+
+## 6. Build example design-system.toml files [pending]
+### Dependencies: 10.5
+### Description: Create a collection of example configuration files for different design system patterns
+### Details:
+Build example TOML files for Material Design, Bootstrap-style, minimal design systems, and enterprise patterns. Include commented examples explaining design decisions, token organization strategies, and scaling approaches for different team sizes.
+
+## 7. Add interactive help system with prompts [pending]
+### Dependencies: 10.2, 10.6
+### Description: Implement an interactive CLI help system that guides users through common workflows
+### Details:
+Create interactive help prompts for first-time setup, implement guided workflows for common tasks like adding new tokens or generating components, and build a tutorial mode with step-by-step instructions. Include progress indicators and contextual help.
+

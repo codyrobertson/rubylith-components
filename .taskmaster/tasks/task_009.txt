@@ -1,0 +1,55 @@
+# Task ID: 9
+# Title: Build Registry Integration Interface
+# Status: pending
+# Dependencies: 8
+# Priority: high
+# Description: Create the interface layer that allows the Contract-Driven Component Registry to consume design-system.toml files
+# Details:
+Implement registry integration module that: exports TOML parsing utilities for registry consumption, provides capability checking functions against component contracts, creates theme provider injection helpers, and supports token/theme lookup for component previews. Ensure sub-100ms performance target for registry operations.
+
+# Test Strategy:
+Registry integration tests, capability checking accuracy tests, performance benchmarks for registry operations, and theme injection validation
+
+# Subtasks:
+## 1. Export TOML parsing utilities for registry [pending]
+### Dependencies: None
+### Description: Create and export TOML parsing utilities specifically designed for registry consumption of design-system.toml files
+### Details:
+Build dedicated TOML parser with registry-specific optimizations, export parsing functions for different sections (tokens, components, themes), implement error handling for malformed TOML, and create validation utilities for required registry fields
+
+## 2. Create capability checking functions [pending]
+### Dependencies: 9.1
+### Description: Implement functions to check component capabilities and compatibility against registry contracts
+### Details:
+Build capability detection algorithms, create contract validation functions, implement compatibility matrix checking, handle version compatibility checks, and provide detailed capability reports for registry decision-making
+
+## 3. Build theme provider injection helpers [pending]
+### Dependencies: 9.1
+### Description: Create helper functions to inject theme providers and handle theme context for registry components
+### Details:
+Implement theme provider factory functions, create context injection utilities, handle multiple theme provider scenarios, support theme switching mechanisms, and ensure proper theme inheritance for nested components
+
+## 4. Implement token/theme lookup for previews [pending]
+### Dependencies: 9.1, 9.3
+### Description: Build efficient token and theme lookup system for component previews in the registry
+### Details:
+Create fast token resolution algorithms, implement theme value lookup with fallbacks, build preview-specific token mapping, handle dynamic token resolution, and optimize for preview rendering performance
+
+## 5. Create registry adapter interface [pending]
+### Dependencies: 9.1, 9.2, 9.3, 9.4
+### Description: Build the main adapter interface that connects all registry integration components together
+### Details:
+Design unified registry adapter API, implement component registration workflows, create registry event handling, build adapter lifecycle management, and ensure consistent interface across all registry operations
+
+## 6. Optimize for sub-100ms performance [pending]
+### Dependencies: 9.1, 9.2, 9.3, 9.4, 9.5
+### Description: Implement performance optimizations to ensure all registry operations complete within 100ms target
+### Details:
+Profile all registry operations, implement lazy loading strategies, optimize parsing algorithms, add performance monitoring, create benchmarking utilities, and implement caching where appropriate to meet sub-100ms targets
+
+## 7. Add caching layer for registry operations [pending]
+### Dependencies: 9.1, 9.2, 9.3, 9.4, 9.6
+### Description: Implement intelligent caching system to improve registry performance and reduce redundant operations
+### Details:
+Build multi-level caching system for parsed TOML, capability results, and theme lookups. Implement cache invalidation strategies, handle cache warming for popular components, create cache hit rate monitoring, and ensure cache consistency across registry operations
+

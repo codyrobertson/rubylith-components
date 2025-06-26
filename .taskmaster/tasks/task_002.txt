@@ -1,0 +1,49 @@
+# Task ID: 2
+# Title: Define TOML Schema and Validation Rules
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Implement the design-system.toml schema definition with strict validation rules according to the PRD specification
+# Details:
+Create TypeScript interfaces and Zod schemas for the complete TOML structure including: name, version, framework, styleEngine, tokens (root, resolution, namespaces), theme (entry, provider, variants), layout (system, responsive), optional extends field, and bridge arrays. Implement validation functions that enforce required fields, valid enum values, and semantic checks like file path existence.
+
+# Test Strategy:
+Comprehensive schema validation tests with valid/invalid TOML examples, edge cases for optional fields, and semantic validation tests
+
+# Subtasks:
+## 1. Define Component and Contract interfaces [pending]
+### Dependencies: None
+### Description: Create TypeScript interfaces for Component and Contract, including all required properties, metadata, and relationship mappings
+### Details:
+Define Component interface with id, name, version, type, capabilities, requirements, and metadata. Define Contract interface with id, provider, consumer, version, endpoints, and validation rules. Include proper typing for all nested structures.
+
+## 2. Define Environment and Capability interfaces [pending]
+### Dependencies: None
+### Description: Create TypeScript interfaces for Environment and Capability, establishing the runtime context and feature declarations
+### Details:
+Define Environment interface with id, name, type, configuration, and constraints. Define Capability interface with id, name, version, type, parameters, and compatibility rules. Include proper typing for configuration objects and constraint definitions.
+
+## 3. Define MountPlan and Profile interfaces [pending]
+### Dependencies: 2.1, 2.2
+### Description: Create TypeScript interfaces for MountPlan and Profile, handling component orchestration and deployment configurations
+### Details:
+Define MountPlan interface with id, components, dependencies, execution order, and environment mappings. Define Profile interface with id, name, environment, capabilities, and configuration overrides. Ensure proper references to Component and Environment interfaces.
+
+## 4. Implement SemVer version handling utilities [pending]
+### Dependencies: None
+### Description: Build utility functions for semantic versioning operations including parsing, comparison, and compatibility checking
+### Details:
+Create parseSemVer function to extract major, minor, patch versions. Implement compareSemVer for version comparison. Build isCompatibleVersion for checking version compatibility ranges. Include support for pre-release and build metadata.
+
+## 5. Create JSON Schema validation setup [pending]
+### Dependencies: 2.1, 2.2, 2.3
+### Description: Set up JSON Schema validation infrastructure for validating all interface data structures at runtime
+### Details:
+Install and configure ajv for JSON Schema validation. Create schema definitions for each interface. Build validation functions with proper error handling and type guards. Include schema composition for nested structures.
+
+## 6. Build utility types for compatibility checking [pending]
+### Dependencies: 2.1, 2.2, 2.3, 2.4
+### Description: Create TypeScript utility types and functions for checking compatibility between components, contracts, and environments
+### Details:
+Build CompatibilityResult type for validation outcomes. Create checkComponentCompatibility function for capability matching. Implement checkContractCompatibility for interface validation. Build checkEnvironmentCompatibility for runtime constraint checking.
+

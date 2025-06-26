@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-06-26T01:42:54.583Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Task Master",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Initialize Project Structure and Dependencies",
+			"complexityScore": 3,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the project initialization into: 1) Node.js/TypeScript setup with package.json and tsconfig.json, 2) Core dependency installation (@iarna/toml, commander.js, chalk, jest), 3) Directory structure creation (src/, tests/, bin/), 4) CLI binary configuration and testing",
+			"reasoning": "Standard project setup with well-defined requirements. Low complexity due to familiar tooling and clear scope."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Define TOML Schema and Validation Rules",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Implement schema definition in phases: 1) Core TypeScript interfaces for all TOML sections, 2) Zod schema implementation with basic validation, 3) Semantic validation rules (file existence, enum values), 4) Error message formatting and reporting, 5) Schema documentation and type exports",
+			"reasoning": "Moderate complexity due to comprehensive schema requirements, multiple validation layers, and need for good error reporting."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implement Core TOML Parser and Writer",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Create parser/writer utilities: 1) TOML parser wrapper with enhanced error reporting and line tracking, 2) Format-preserving TOML writer implementation, 3) File I/O utilities with error handling, 4) Integration with schema validation pipeline",
+			"reasoning": "Moderate complexity requiring careful error handling, format preservation, and integration with validation system."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Build Asset Detection Engine",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Develop heuristic detection system: 1) File system scanner with pattern matching, 2) Token file detection (JSON/JS/TS patterns), 3) Theme provider detection logic, 4) Framework and style engine detection from package.json, 5) Confidence scoring algorithm, 6) Interactive prompting for uncertain detections",
+			"reasoning": "High complexity due to heuristic nature, multiple detection patterns, scoring system, and need to handle diverse DS structures."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Implement 'dsm generate' Command",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Build generate command: 1) CLI command setup with options parsing, 2) Integration with asset detection engine, 3) Interactive prompt system for missing values, 4) TOML file generation and writing, 5) Performance optimization and progress feedback",
+			"reasoning": "High complexity due to interactive nature, integration of multiple systems, and performance requirements."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement 'dsm validate' Command",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Create validation command: 1) CLI command setup and file reading, 2) Schema validation integration, 3) Semantic checks implementation (file paths, references), 4) Error reporting with actionable messages and line numbers",
+			"reasoning": "Moderate complexity with clear requirements, mainly integrating existing validation logic with CLI interface."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Create Token and Theme Resolution System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Build resolution system: 1) Token file parser supporting multiple formats (JSON/JS/DTCG), 2) Namespace resolution and validation logic, 3) Theme provider detection and validation, 4) Theme variant resolution, 5) Error handling for missing references",
+			"reasoning": "High complexity due to multiple token formats, namespace resolution logic, and theme provider patterns."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Implement Layout System Validation",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Implement layout validation: 1) Layout system identifier validation (grid-12, flexbox, custom), 2) Responsive configuration and breakpoint validation, 3) StyleEngine compatibility checking",
+			"reasoning": "Moderate complexity with well-defined validation rules and limited scope."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Build Registry Integration Interface",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Create registry interface: 1) Export parsing utilities for registry consumption, 2) Capability checking functions against contracts, 3) Theme provider injection helpers, 4) Performance optimization for sub-100ms operations",
+			"reasoning": "Moderate to high complexity due to integration requirements and strict performance targets."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Create Documentation and CLI Help System",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Build documentation system: 1) CLI command reference with examples, 2) TOML schema documentation, 3) Framework integration guides, 4) Rich CLI help implementation, 5) Example files and troubleshooting guides",
+			"reasoning": "Moderate complexity requiring comprehensive coverage but straightforward implementation."
+		}
+	]
+}

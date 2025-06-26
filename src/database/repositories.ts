@@ -11,6 +11,7 @@ import type {
   Environment,
   Capability,
   MountPlan,
+  User,
   Prisma,
 } from '../../generated/prisma';
 
@@ -31,6 +32,104 @@ abstract class BaseRepository {
   protected handleError(error: unknown, operation: string): never {
     const message = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Database ${operation} failed: ${message}`);
+  }
+}
+
+// =============================================================================
+// User Repository
+// =============================================================================
+
+export class UserRepository extends BaseRepository {
+  async findAll(): Promise<User[]> {
+    try {
+      const client = await this.getClient();
+      return await client.user.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      this.handleError(error, 'user findAll');
+    }
+  }
+
+  async findById(id: string): Promise<User | null> {
+    try {
+      const client = await this.getClient();
+      return await client.user.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      this.handleError(error, 'user findById');
+    }
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    try {
+      const client = await this.getClient();
+      return await client.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+    } catch (error) {
+      this.handleError(error, 'user findByEmail');
+    }
+  }
+
+  async create(data: Prisma.UserCreateInput): Promise<User> {
+    try {
+      const client = await this.getClient();
+      return await client.user.create({
+        data: {
+          ...data,
+          email: data.email.toLowerCase(),
+        },
+      });
+    } catch (error) {
+      this.handleError(error, 'user create');
+    }
+  }
+
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    try {
+      const client = await this.getClient();
+      return await client.user.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      this.handleError(error, 'user update');
+    }
+  }
+
+  async updateLastLogin(id: string): Promise<User> {
+    try {
+      const client = await this.getClient();
+      return await client.user.update({
+        where: { id },
+        data: { lastLoginAt: new Date() },
+      });
+    } catch (error) {
+      this.handleError(error, 'user updateLastLogin');
+    }
+  }
+
+  async findByRole(role: string): Promise<User[]> {
+    try {
+      const client = await this.getClient();
+      return await client.user.findMany({
+        where: { role: role as Prisma.EnumUserRoleFilter<'User'> },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      this.handleError(error, 'user findByRole');
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      const client = await this.getClient();
+      await client.user.delete({ where: { id } });
+    } catch (error) {
+      this.handleError(error, 'user delete');
+    }
   }
 }
 
@@ -70,6 +169,24 @@ export class ComponentRepository extends BaseRepository {
       });
     } catch (error) {
       this.handleError(error, 'component findAll');
+    }
+  }
+
+  async findById(id: string): Promise<Component | null> {
+    try {
+      const client = await this.getClient();
+
+      return await client.component.findUnique({
+        where: { id },
+        include: {
+          contract: true,
+          dependencies: true,
+          provides: true,
+          requires: true,
+        },
+      });
+    } catch (error) {
+      this.handleError(error, 'component findById');
     }
   }
 
@@ -467,11 +584,19 @@ export class MountPlanRepository extends BaseRepository {
 // =============================================================================
 
 export class RepositoryFactory {
+  private static userRepo: UserRepository | null = null;
   private static componentRepo: ComponentRepository | null = null;
   private static contractRepo: ContractRepository | null = null;
   private static environmentRepo: EnvironmentRepository | null = null;
   private static capabilityRepo: CapabilityRepository | null = null;
   private static mountPlanRepo: MountPlanRepository | null = null;
+
+  static getUserRepository(): UserRepository {
+    if (!this.userRepo) {
+      this.userRepo = new UserRepository();
+    }
+    return this.userRepo;
+  }
 
   static getComponentRepository(): ComponentRepository {
     if (!this.componentRepo) {

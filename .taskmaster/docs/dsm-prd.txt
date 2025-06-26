@@ -1,0 +1,164 @@
+# Product Requirements Document
+
+**Project Code‑Name:** **DSM** *(Design‑System Manifest)*
+**Manifest File:** `design-system.toml` – **TOML‑only, no JSON fallback**
+
+---
+
+## 1 · Executive Summary
+
+We will deliver a *single*, **TOML‑based manifest** (`design-system.toml`) that captures everything a Design System exposes to the Contract‑Driven Component Registry:
+
+* Token locations & namespaces
+* Theme entry point & variants
+* Layout identifier(s)
+* Styling engine details
+* Framework/runtime target
+* Optional inheritance & bridges
+
+A CLI (`dsm`) will generate, validate, diff, and publish the manifest. JSON, YAML, or any other formats are **out‑of‑scope**.
+
+---
+
+## 2 · Vision & Goals
+
+| Goal                      | Success Indicator                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| **TOML‑first, TOML‑only** | All tools accept and emit TOML exclusively.                                       |
+| **Author‑friendly**       | `dsm generate` produces a valid manifest in ≤ 1 s on a typical repo.              |
+| **Registry‑ready**        | Registry relies solely on `design-system.toml` for capability checks.             |
+| **Extensible**            | TOML tables support opt‑in bridges & inheritance without breaking existing files. |
+
+---
+
+## 3 · Core Personas
+
+| Persona         | What DSM Gives Them                                                |
+| --------------- | ------------------------------------------------------------------ |
+| UI Engineer     | One declarative place for tokens, themes, layout rules.            |
+| Frontend Dev    | Drop‑in file to preview/mount components locally.                  |
+| DS Owner        | Easy diffing & versioning; clear contract for registry validation. |
+| CI/Tooling Team | Straight‑forward TOML parsing and gating.                          |
+
+---
+
+## 4 · Functional Requirements
+
+### 4.1 TOML Manifest Structure (`design-system.toml`)
+
+> *Strictly TOML – no JSON mirrors, no YAML exports.*
+
+```toml
+name        = "@acme/design-system"
+version     = "1.0.0"
+
+framework   = "react"         # primary runtime
+styleEngine = "tailwind"      # e.g. tailwind | emotion | css-modules
+
+#---------------------------------- TOKENS -------------------------------
+[tokens]
+root        = "./tokens"                # relative path
+resolution  = "cascade"                 # none | cascade
+namespaces  = ["global.colors", "global.spacing"]
+
+#---------------------------------- THEME --------------------------------
+[theme]
+entry       = "./theme/index.tsx"
+provider    = "@acme/theme-provider"
+variants    = ["light", "dark"]
+
+#---------------------------------- LAYOUT -------------------------------
+[layout]
+system      = "grid-12"
+responsive  = true
+
+#---------------------------------- OPTIONAL: INHERITANCE ----------------
+extends     = "@acme/base-ds@0.5.0"
+
+#---------------------------------- OPTIONAL: BRIDGES --------------------
+[[bridge]]
+target      = "@legacy/ds-v1"
+file        = "./bridges/ds-v1.toml"
+```
+
+---
+
+### 4.2 CLI Tool (`dsm`)
+
+| Command                              | Purpose                                                  |
+| ------------------------------------ | -------------------------------------------------------- |
+| `dsm generate`                       | Auto‑detect DS assets; write `design-system.toml`.       |
+| `dsm validate`                       | Parse TOML; enforce schema & semantic checks.            |
+| `dsm diff <old> <new>`               | Show breaking/compatible changes (token, theme, layout). |
+| `dsm bridge create --target <other>` | Scaffold bridge TOML for token mapping.                  |
+
+*CLI output is text‑table / colorized logs – **never JSON**.*
+
+---
+
+### 4.3 Registry Integration
+
+The Contract‑Driven Component Registry:
+
+1. **Parses** `design-system.toml` directly (TOML parser).
+2. **Checks** component contracts against tokens/theme/layout definitions.
+3. **Injects** theme provider & tokens for previews.
+4. **Applies** bridges when cross‑DS usage is requested.
+
+---
+
+## 5 · Non‑Functional Requirements
+
+| NFR                  | Target                                                                       |
+| -------------------- | ---------------------------------------------------------------------------- |
+| **Performance**      | `dsm generate` ≤ 1 s on 1 k token keys.                                      |
+| **DX**               | Zero flags for React + Tailwind standard repo.                               |
+| **Schema Stability** | Backwards‑compatible TOML keys for all v1.x versions.                        |
+| **Security**         | CLI never `require`s or executes arbitrary code; token parsing is data‑only. |
+
+---
+
+## 6 · MVP Scope
+
+1. **TOML Schema v1**: name, version, tokens, theme, layout, styleEngine, framework.
+2. **`dsm generate`**: heuristic asset detection + interactive fallback prompts.
+3. **`dsm validate`**: static TOML parsing + value checks.
+4. **Registry ingestion**: environment records reference `design-system.toml`.
+
+*(Bridges, diff, inheritance handling in post‑MVP sprint.)*
+
+---
+
+## 7 · Milestones
+
+| Phase                          | Weeks | Deliverables                                    |
+| ------------------------------ | ----- | ----------------------------------------------- |
+| **P0 – Spec Draft**            |  1‑2  | TOML schema doc & sample file                   |
+| **P1 – CLI Generate+Validate** |  3‑6  | `dsm` binary, tests, docs                       |
+| **P2 – Registry Hook**         |  7‑8  | Registry service reads TOML; mount plan uses it |
+| **P3 – Diff & Bridges**        |  9‑11 | `dsm diff`, `dsm bridge`, CI examples           |
+
+---
+
+## 8 · Success Metrics
+
+| Metric                                 | MVP Target                   |
+| -------------------------------------- | ---------------------------- |
+| **First‑run success (`dsm generate`)** | ≥ 95 %                       |
+| **Registry check latency**             | ≤ 100 ms                     |
+| **Published manifests**                | 10 systems in first 3 months |
+| **DS mismatch tickets**                | ↓ 75 % vs. baseline          |
+
+---
+
+## 9 · Risks & Mitigations
+
+| Risk                  | Mitigation                                                     |
+| --------------------- | -------------------------------------------------------------- |
+| Diverse token formats | Pluggable token parsers + interactive CLI when uncertain.      |
+| Teams skip manifest   | Registry blocks publish without valid TOML after grace period. |
+| TOML unfamiliarity    | Provide IDE snippets & clear docs; no alt formats.             |
+
+---
+
+### End of PRD — **`design-system.toml` (TOML‑only) v1**

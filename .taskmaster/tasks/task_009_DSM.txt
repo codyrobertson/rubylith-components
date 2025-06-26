@@ -1,0 +1,55 @@
+# Task ID: 9
+# Title: Build Registry Integration Interface
+# Status: pending
+# Dependencies: 8
+# Priority: high
+# Description: Create the interface layer that allows the Contract-Driven Component Registry to consume design-system.toml files
+# Details:
+Implement registry integration module that: exports TOML parsing utilities for registry consumption, provides capability checking functions against component contracts, creates theme provider injection helpers, and supports token/theme lookup for component previews. Ensure sub-100ms performance target for registry operations.
+
+# Test Strategy:
+Registry integration tests, capability checking accuracy tests, performance benchmarks for registry operations, and theme injection validation
+
+# Subtasks:
+## 1. Create profile data models and storage [pending]
+### Dependencies: None
+### Description: Design and implement the core data models for profiles including schema definitions, database tables, and repository patterns for persistent storage
+### Details:
+Define Profile entity with fields for name, description, mount plan references, metadata, timestamps. Create database migrations, implement repository interface with CRUD operations, add indexing for efficient queries
+
+## 2. Implement profile creation from mount plans [pending]
+### Dependencies: 9.1
+### Description: Build functionality to create profiles by capturing and storing mount plan configurations, including all settings and parameters
+### Details:
+Create profile factory service that reads mount plan data, transforms it into profile format, handles nested configurations, validates completeness, and stores profile with proper associations to source mount plans
+
+## 3. Add versioning with SemVer support [pending]
+### Dependencies: 9.1
+### Description: Implement semantic versioning system for profiles to track changes and maintain version history
+### Details:
+Add version field to profile model, implement SemVer parsing and validation, create version increment logic for major/minor/patch changes, maintain version history table, add version comparison utilities
+
+## 4. Build sharing and permissions system [pending]
+### Dependencies: 9.1
+### Description: Create access control system for profiles with user permissions, sharing capabilities, and role-based access
+### Details:
+Design permission model with owner/viewer/editor roles, implement sharing API endpoints, add access control checks to all profile operations, create UI for managing permissions, handle permission inheritance
+
+## 5. Create validation against environments [pending]
+### Dependencies: 9.1, 9.2
+### Description: Implement validation system to ensure profiles are compatible with target deployment environments
+### Details:
+Build environment compatibility checker, validate resource requirements, check dependency availability, verify configuration constraints, provide detailed validation reports with actionable feedback
+
+## 6. Implement diff/merge functionality [pending]
+### Dependencies: 9.1, 9.3
+### Description: Create algorithms to compare profiles and merge changes between different versions or branches
+### Details:
+Implement deep object comparison for profile structures, create visual diff representation, build three-way merge algorithm, handle merge conflicts with resolution strategies, add conflict resolution UI
+
+## 7. Add import/export with JSON format [pending]
+### Dependencies: 9.1, 9.2, 9.3, 9.5
+### Description: Build import/export functionality for profiles using standardized JSON format for portability
+### Details:
+Design JSON schema for profile export format, implement serialization/deserialization logic, add format validation, support bulk import/export operations, handle version compatibility during import
+

@@ -1,0 +1,61 @@
+# Task ID: 6
+# Title: Implement 'dsm validate' Command
+# Status: pending
+# Dependencies: 3
+# Priority: high
+# Description: Create validation command that parses TOML files and performs comprehensive schema and semantic checks
+# Details:
+Build validation command that: parses design-system.toml using TOML parser, validates against schema with detailed error messages, performs semantic checks (file path existence, valid framework/styleEngine values), checks token namespace validity, and provides actionable error reporting with line numbers and suggestions for fixes.
+
+# Test Strategy:
+Validation tests with various invalid TOML files, semantic error detection tests, error message clarity validation, and performance tests
+
+# Subtasks:
+## 1. Set up validate command with commander.js [pending]
+### Dependencies: None
+### Description: Create the 'dsm validate' CLI command structure with proper options and help documentation
+### Details:
+Configure commander.js command with description, options (--file for specific file path, --strict for enhanced validation), and help examples. Set up command action handler with proper error handling and exit codes. Implement option parsing for file path detection.
+
+## 2. Implement TOML parsing with error handling [pending]
+### Dependencies: 6.1
+### Description: Create robust TOML parser wrapper that provides detailed error information including line numbers and parsing context
+### Details:
+Wrap @iarna/toml parser with enhanced error handling, capture line and column numbers for syntax errors, provide context around error locations, handle file reading errors gracefully. Return structured error objects with actionable information.
+
+## 3. Perform schema validation against defined schema [pending]
+### Dependencies: 6.2
+### Description: Validate parsed TOML content against the design-system.toml schema using Zod or similar validation library
+### Details:
+Apply Zod schema validation to parsed TOML data, check all required fields (name, version, framework, styleEngine), validate nested structures (tokens, theme, layout), collect all validation errors rather than failing on first error. Generate user-friendly error messages.
+
+## 4. Add semantic validation checks [pending]
+### Dependencies: 6.3
+### Description: Implement deeper validation beyond schema to check file paths existence, valid enum values, and logical consistency
+### Details:
+Verify referenced file paths exist (theme.entry, tokens.root), validate framework and styleEngine against allowed values, check semantic version format, ensure token namespaces reference valid paths. Provide warnings for deprecated patterns.
+
+## 5. Validate token namespaces [pending]
+### Dependencies: 6.4
+### Description: Implement specific validation logic for token namespace definitions and their resolution paths
+### Details:
+Parse token namespace definitions, verify namespace paths resolve to actual token files, validate token file formats (JSON, JS, DTCG), check for circular namespace references, ensure namespace naming conventions. Support different token formats.
+
+## 6. Create detailed error reporting with line numbers [pending]
+### Dependencies: 6.2, 6.3, 6.4, 6.5
+### Description: Build comprehensive error reporting system that shows exact error locations with line numbers and visual indicators
+### Details:
+Create error formatter that shows file snippets with line numbers, highlight error locations with color coding, group related errors together, provide error summaries with counts. Include source file preview around error locations for context.
+
+## 7. Build actionable error messages and fix suggestions [pending]
+### Dependencies: 6.6
+### Description: Enhance error messages with specific suggestions for how to fix common validation issues
+### Details:
+Create error message templates with fix suggestions, detect common mistakes and provide targeted advice, suggest valid values for enum fields, provide examples of correct syntax. Include links to documentation for complex issues.
+
+## 8. Performance testing and optimization [pending]
+### Dependencies: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7
+### Description: Optimize validation performance to meet sub-100ms target for typical design-system.toml files
+### Details:
+Profile validation performance, optimize file system operations with async/await, implement validation caching for repeated checks, parallelize independent validation steps where possible. Add performance metrics to verbose output mode.
+

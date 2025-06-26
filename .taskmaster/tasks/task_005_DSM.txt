@@ -1,0 +1,49 @@
+# Task ID: 5
+# Title: Implement 'dsm generate' Command
+# Status: pending
+# Dependencies: 4
+# Priority: high
+# Description: Create the primary CLI command that auto-detects DS assets and generates design-system.toml files
+# Details:
+Build interactive CLI command using commander.js that: scans project for DS assets, presents detected configurations with confidence scores, prompts for missing/uncertain values, generates valid design-system.toml file, and provides success feedback. Include --force flag to overwrite existing files and --dry-run for preview mode. Ensure sub-1-second performance target for typical repositories.
+
+# Test Strategy:
+End-to-end generation tests on sample repositories, performance benchmarks, interactive prompt testing, and edge case handling
+
+# Subtasks:
+## 1. Set up CLI command structure with commander.js [pending]
+### Dependencies: None
+### Description: Create the 'dsm generate' command using commander.js with proper options and help text
+### Details:
+Configure commander.js command with description, options (--force, --dry-run, --output), and help examples. Set up command action handler with proper error handling and exit codes. Implement option parsing and validation.
+
+## 2. Integrate asset detection engine [pending]
+### Dependencies: 5.1
+### Description: Connect the generate command with the asset detection engine to scan for design system files
+### Details:
+Call asset detection engine from command handler, pass current working directory for scanning, handle detection results with confidence scores. Create data structure to hold detected assets and missing values for prompting.
+
+## 3. Build interactive prompts for missing values [pending]
+### Dependencies: 5.2
+### Description: Implement interactive CLI prompts using inquirer.js for gathering missing or uncertain configuration values
+### Details:
+Create prompt flows for missing required fields (name, version, framework), show detected values with confidence scores for confirmation, implement conditional prompts based on framework selection. Add validation for user inputs and helpful default suggestions.
+
+## 4. Implement TOML generation and file writing [pending]
+### Dependencies: 5.3
+### Description: Generate valid design-system.toml content from detected and prompted values, then write to disk
+### Details:
+Transform collected data into TOML structure, use TOML writer to generate properly formatted output, implement file writing with proper error handling. Handle --dry-run mode to preview without writing, manage --force flag for overwriting existing files.
+
+## 5. Add performance optimization and progress feedback [pending]
+### Dependencies: 5.2, 5.4
+### Description: Optimize scanning performance and provide real-time progress feedback to users
+### Details:
+Implement progress bars using ora or similar for file scanning, optimize file system operations with parallel scanning where possible. Add performance timing to ensure sub-1-second execution for typical projects. Show clear success/error messages with next steps.
+
+## 6. Implement --force and --dry-run functionality [pending]
+### Dependencies: 5.4, 5.5
+### Description: Add support for force overwrite and dry-run preview modes with appropriate user feedback
+### Details:
+For --force: check for existing design-system.toml, warn user before overwriting, create backup of existing file. For --dry-run: show generated TOML content in console with syntax highlighting, display what would be written without actual file operations.
+
