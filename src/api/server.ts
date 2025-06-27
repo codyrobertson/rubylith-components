@@ -9,12 +9,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { authMiddleware } from './middleware/auth';
 import { apiRouter } from './routes';
 import { initializeDatabase } from '../database';
+import { specs } from './docs/swagger';
 
 export class ApiServer {
   private app: Express;
@@ -65,6 +67,25 @@ export class ApiServer {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         res.status(503).json({ status: 'not ready', database: 'disconnected', error: errorMessage });
       }
+    });
+
+    // API Documentation
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+      explorer: true,
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'Rubylith Component Registry API',
+      swaggerOptions: {
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        filter: true,
+        tryItOutEnabled: true,
+      },
+    }));
+
+    // API specification JSON endpoint
+    this.app.get('/api-docs.json', (_req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(specs);
     });
   }
 

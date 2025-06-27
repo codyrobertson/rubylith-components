@@ -53,7 +53,7 @@ let maintenanceMode = {
 };
 
 // Route handlers
-const getSystemInfo = async (req: Request, res: Response, next: NextFunction) => {
+const getSystemInfo = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const [dbHealth, packageInfo] = await Promise.all([
       checkDatabaseHealth(),
@@ -85,7 +85,7 @@ const getSystemInfo = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-const getSystemHealth = async (req: Request, res: Response, next: NextFunction) => {
+const getSystemHealth = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const [dbHealth, diskUsage, memoryInfo] = await Promise.all([
       checkDatabaseHealth(),
@@ -97,7 +97,7 @@ const getSystemHealth = async (req: Request, res: Response, next: NextFunction) 
       status: 'healthy',
       checks: {
         database: {
-          status: dbHealth.healthy ? 'healthy' : 'unhealthy',
+          status: dbHealth.isConnected ? 'healthy' : 'unhealthy',
           details: dbHealth,
         },
         memory: {
@@ -134,7 +134,7 @@ const getSystemHealth = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-const getSystemMetrics = async (req: Request, res: Response, next: NextFunction) => {
+const getSystemMetrics = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const metrics = {
       timestamp: new Date(),
@@ -383,4 +383,3 @@ router.post('/cache/clear', clearCache);
 router.post('/restart', restartSystem);
 
 export const systemRoutes = router;
-export { maintenanceMiddleware };

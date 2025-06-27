@@ -1,0 +1,644 @@
+# Environments API Paths
+
+paths:
+  /environments:
+    get:
+      tags:
+        - Environments
+      summary: List environments
+      description: Get a paginated list of execution environments with optional filtering
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 20
+        - name: offset
+          in: query
+          description: Number of items to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: environmentType
+          in: query
+          description: Filter by environment type
+          schema:
+            type: string
+            enum: [production, staging, development, testing]
+        - name: runtimeFramework
+          in: query
+          description: Filter by runtime framework
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by health status
+          schema:
+            type: string
+            enum: [healthy, degraded, unhealthy, maintenance]
+        - name: search
+          in: query
+          description: Search in name or description
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of environments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Environment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Environments
+      summary: Create environment
+      description: Create a new execution environment (requires MAINTAINER or OWNER role)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                version:
+                  type: string
+                  pattern: '^\\d+\\.\\d+\\.\\d+$'
+                description:
+                  type: string
+                environmentType:
+                  type: string
+                  enum: [production, staging, development, testing]
+                runtimeFramework:
+                  type: string
+                  minLength: 1
+                runtimeVersion:
+                  type: string
+                  minLength: 1
+                serverSpecs:
+                  type: object
+                  properties:
+                    cpu:
+                      type: string
+                    memory:
+                      type: string
+                    storage:
+                      type: string
+                    network:
+                      type: string
+                  required: [cpu, memory, storage]
+                networkConfig:
+                  type: object
+                  properties:
+                    publicUrls:
+                      type: array
+                      items:
+                        type: string
+                        format: uri
+                    internalUrls:
+                      type: array
+                      items:
+                        type: string
+                        format: uri
+                    ports:
+                      type: array
+                      items:
+                        type: integer
+                        minimum: 1
+                        maximum: 65535
+                    ssl:
+                      type: boolean
+                      default: true
+                    cdn:
+                      type: string
+                  required: [publicUrls, ports]
+                securityConfig:
+                  type: object
+                  properties:
+                    isolationLevel:
+                      type: string
+                      enum: [strict, moderate, relaxed]
+                    permissions:
+                      type: array
+                      items:
+                        type: string
+                    allowedOrigins:
+                      type: array
+                      items:
+                        type: string
+                    rateLimits:
+                      type: object
+                  required: [isolationLevel, permissions, allowedOrigins]
+                capabilities:
+                  type: array
+                  items:
+                    type: string
+                supportedContracts:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - name
+                - version
+                - description
+                - environmentType
+                - runtimeFramework
+                - runtimeVersion
+                - serverSpecs
+                - networkConfig
+                - securityConfig
+                - capabilities
+                - supportedContracts
+            example:
+              name: ProductionEnv
+              version: 1.0.0
+              description: Production environment for React components
+              environmentType: production
+              runtimeFramework: react
+              runtimeVersion: 18.0.0
+              serverSpecs:
+                cpu: 4 cores
+                memory: 8GB
+                storage: 100GB
+              networkConfig:
+                publicUrls: [https://components.example.com]
+                ports: [443, 80]
+                ssl: true
+              securityConfig:
+                isolationLevel: strict
+                permissions: [read, execute]
+                allowedOrigins: [https://app.example.com]
+              capabilities: [ssr, csr, static]
+              supportedContracts: [ButtonContract, InputContract]
+      responses:
+        201:
+          description: Environment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Environment'
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        409:
+          description: Environment already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /environments/{id}:
+    get:
+      tags:
+        - Environments
+      summary: Get environment
+      description: Retrieve a specific environment by ID or name:version
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Environment ID or name:version
+          schema:
+            type: string
+      responses:
+        200:
+          description: Environment details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Environment'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Environment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - Environments
+      summary: Update environment
+      description: Update an existing environment (requires MAINTAINER or OWNER role)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Environment ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                serverSpecs:
+                  type: object
+                  properties:
+                    cpu:
+                      type: string
+                    memory:
+                      type: string
+                    storage:
+                      type: string
+                    network:
+                      type: string
+                networkConfig:
+                  type: object
+                  properties:
+                    publicUrls:
+                      type: array
+                      items:
+                        type: string
+                        format: uri
+                    ports:
+                      type: array
+                      items:
+                        type: integer
+                capabilities:
+                  type: array
+                  items:
+                    type: string
+            example:
+              description: Updated production environment with enhanced security
+              serverSpecs:
+                cpu: 8 cores
+                memory: 16GB
+      responses:
+        200:
+          description: Environment updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Environment'
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Environment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Environments
+      summary: Delete environment
+      description: Delete an environment (requires OWNER role)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Environment ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: Environment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Environment deleted successfully
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Environment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /environments/{id}/health:
+    get:
+      tags:
+        - Environments
+      summary: Get environment health
+      description: Get health status and metrics for an environment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Environment ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: Environment health information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      environmentId:
+                        type: string
+                      environmentName:
+                        type: string
+                      status:
+                        type: string
+                        enum: [healthy, degraded, unhealthy, maintenance]
+                      lastCheck:
+                        type: string
+                        format: date-time
+                      uptime:
+                        type: integer
+                        description: Uptime in seconds
+                      metrics:
+                        type: object
+                        properties:
+                          cpuUsage:
+                            type: integer
+                            minimum: 0
+                            maximum: 100
+                          memoryUsage:
+                            type: integer
+                            minimum: 0
+                            maximum: 100
+                          diskUsage:
+                            type: integer
+                            minimum: 0
+                            maximum: 100
+                          networkLatency:
+                            type: integer
+                          activeConnections:
+                            type: integer
+                          requestsPerMinute:
+                            type: integer
+                      services:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            status:
+                              type: string
+                            responseTime:
+                              type: integer
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Environment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Environments
+      summary: Update environment health
+      description: Update health status for an environment (requires MAINTAINER or OWNER role)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Environment ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [healthy, degraded, unhealthy, maintenance]
+                message:
+                  type: string
+                metrics:
+                  type: object
+              required:
+                - status
+            example:
+              status: healthy
+              message: All systems operational
+              metrics: {}
+      responses:
+        200:
+          description: Health status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      environmentId:
+                        type: string
+                      previousStatus:
+                        type: string
+                      newStatus:
+                        type: string
+                      message:
+                        type: string
+                      metrics:
+                        type: object
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      updatedBy:
+                        type: string
+                  message:
+                    type: string
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Environment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /environments/{id}/capabilities:
+    get:
+      tags:
+        - Environments
+      summary: Get environment capabilities
+      description: Get detailed capabilities and features of an environment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Environment ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: Environment capabilities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      environmentId:
+                        type: string
+                      runtimeFramework:
+                        type: string
+                      runtimeVersion:
+                        type: string
+                      capabilities:
+                        type: array
+                        items:
+                          type: string
+                      supportedContracts:
+                        type: array
+                        items:
+                          type: string
+                      resourceLimits:
+                        type: object
+                      deploymentStrategies:
+                        type: array
+                        items:
+                          type: string
+                      features:
+                        type: object
+                        properties:
+                          autoScaling:
+                            type: boolean
+                          healthChecks:
+                            type: boolean
+                          monitoring:
+                            type: boolean
+                          logging:
+                            type: string
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Environment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

@@ -104,7 +104,7 @@ const listUsers = async (req: Request, res: Response, next: NextFunction) => {
 
 const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id }: { id: string } = req.params;
+    const { id } = req.params;
     
     const userRepo = RepositoryFactory.getUserRepository();
     const user = await userRepo.findById(id);
@@ -176,7 +176,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id }: { id: string } = req.params;
+    const { id } = req.params;
     const { firstName, lastName, role, isActive }: {
       firstName?: string;
       lastName?: string;

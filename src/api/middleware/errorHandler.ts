@@ -76,16 +76,24 @@ export const errorHandler = (
   }
 
   // Send error response
-  res.status(statusCode).json({
+  const errorResponse: any = {
     error: {
       message,
       code,
-      ...(details && { details }),
-      ...(config.server.env === 'development' && { stack: err.stack }),
     },
     timestamp: new Date().toISOString(),
     path: req.path,
-  });
+  };
+
+  if (details) {
+    errorResponse.error.details = details;
+  }
+
+  if (config.server.env === 'development' && err.stack) {
+    errorResponse.error.stack = err.stack;
+  }
+
+  res.status(statusCode).json(errorResponse);
 };
 
 // Common error generators

@@ -78,16 +78,16 @@ function logAuditEntry(req: Request, res: Response, action: string, resource: st
   const entry: AuditLogEntry = {
     id: generateId(),
     timestamp: new Date(),
-    userId: req.user?.id,
-    userEmail: req.user?.email,
+    userId: req.user?.id || undefined,
+    userEmail: req.user?.email || undefined,
     action,
     resource,
-    resourceId: req.params.id,
+    resourceId: req.params['id'] || undefined,
     method: req.method,
     path: req.path,
     statusCode: res.statusCode,
-    userAgent: req.headers['user-agent'],
-    ipAddress: req.ip || req.connection.remoteAddress,
+    userAgent: req.headers['user-agent'] || undefined,
+    ipAddress: req.ip || (req as any).connection?.remoteAddress || undefined,
     details: {
       query: req.query,
       body: sanitizeBody(req.body),
@@ -196,7 +196,7 @@ const getAuditLogs = (req: Request, res: Response, next: NextFunction) => {
 
 const getAuditLog = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id }: { id: string } = req.params;
+    const { id } = req.params;
     
     const logEntry = auditLog.find(entry => entry.id === id);
     
@@ -231,19 +231,19 @@ const getAuditStats = (req: Request, res: Response, next: NextFunction) => {
     // Count by action
     auditLog.forEach(log => {
       const actionKey = log.action;
-      stats.byAction[actionKey] = (stats.byAction[actionKey] || 0) + 1;
+      (stats.byAction as any)[actionKey] = ((stats.byAction as any)[actionKey] || 0) + 1;
     });
 
     // Count by resource
     auditLog.forEach(log => {
       const resourceKey = log.resource;
-      stats.byResource[resourceKey] = (stats.byResource[resourceKey] || 0) + 1;
+      (stats.byResource as any)[resourceKey] = ((stats.byResource as any)[resourceKey] || 0) + 1;
     });
 
     // Count by status code
     auditLog.forEach(log => {
       const statusKey = log.statusCode.toString();
-      stats.byStatusCode[statusKey] = (stats.byStatusCode[statusKey] || 0) + 1;
+      (stats.byStatusCode as any)[statusKey] = ((stats.byStatusCode as any)[statusKey] || 0) + 1;
     });
 
     res.json({ data: stats });
@@ -312,4 +312,3 @@ router.get('/export', exportAuditLogs);
 router.get('/:id', validateRequest({ params: auditParamsSchema }), getAuditLog);
 
 export const auditRoutes = router;
-export { auditMiddleware };
