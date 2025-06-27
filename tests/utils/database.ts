@@ -3,41 +3,39 @@
  * Handles test database setup, teardown, and data management
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma';
 import { execSync } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 
 export class TestDatabase {
-  private static instance: TestDatabase | null = null;
   private client: PrismaClient | null = null;
   private dbPath: string;
+  private isSetup: boolean = false;
 
-  private constructor() {
-    // Generate unique database path for this test run
+  constructor(testSuiteName?: string) {
+    // Generate unique database path for each test suite
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(7);
-    this.dbPath = path.join(process.cwd(), `test-${timestamp}-${random}.db`);
+    const suiteName = testSuiteName || 'test';
+    this.dbPath = path.join(process.cwd(), 'tests', `${suiteName}-${timestamp}-${random}.db`);
     
     // Update the DATABASE_URL to use our test database
     process.env.DATABASE_URL = `file:${this.dbPath}`;
   }
 
   /**
-   * Get singleton instance of TestDatabase
-   */
-  static getInstance(): TestDatabase {
-    if (!TestDatabase.instance) {
-      TestDatabase.instance = new TestDatabase();
-    }
-    return TestDatabase.instance;
-  }
-
-  /**
    * Initialize test database
    */
   async setup(): Promise<void> {
+    if (this.isSetup) {
+      return;
+    }
+
     try {
+      // Ensure tests directory exists
+      await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
+
       // Run database migrations
       execSync('npx prisma db push --force-reset', {
         stdio: 'pipe',
@@ -51,9 +49,11 @@ export class TestDatabase {
             url: `file:${this.dbPath}`,
           },
         },
+        log: process.env.NODE_ENV === 'test' ? [] : ['query', 'error', 'warn'],
       });
 
       await this.client.$connect();
+      this.isSetup = true;
       console.log(`Test database initialized: ${this.dbPath}`);
     } catch (error) {
       console.error('Failed to setup test database:', error);
@@ -69,6 +69,13 @@ export class TestDatabase {
       throw new Error('Test database not initialized. Call setup() first.');
     }
     return this.client;
+  }
+
+  /**
+   * Get Prisma client instance (alias for compatibility)
+   */
+  get prisma(): PrismaClient {
+    return this.getClient();
   }
 
   /**
@@ -335,7 +342,81 @@ export class TestDatabase {
     }
     return this.client.$transaction(callback);
   }
+
+  /**
+   * Clean database (alias)
+   */
+  async clean(): Promise<void> {
+    return this.cleanDatabase();
+  }
+
+  /**
+   * Connect to database
+   */
+  async connect(): Promise<void> {
+    if (!this.client) {
+      await this.setup();
+    }
+  }
+
+  /**
+   * Disconnect from database
+   */
+  async disconnect(): Promise<void> {
+    if (this.client) {
+      await this.client.$disconnect();
+    }
+  }
+
+  /**
+   * Create user helper
+   */
+  async createUser(data: any): Promise<any> {
+    const client = this.getClient();
+    return client.user.create({ data });
+  }
+
+  /**
+   * Create component helper
+   */
+  async createComponent(data: any): Promise<any> {
+    const client = this.getClient();
+    return client.component.create({ data });
+  }
+
+  /**
+   * Create contract helper
+   */
+  async createContract(data: any): Promise<any> {
+    const client = this.getClient();
+    return client.contract.create({ data });
+  }
+
+  /**
+   * Create environment helper
+   */
+  async createEnvironment(data: any): Promise<any> {
+    const client = this.getClient();
+    return client.environment.create({ data });
+  }
+
+  /**
+   * Create audit log helper
+   */
+  async createAuditLog(data: any): Promise<any> {
+    const client = this.getClient();
+    return client.auditLog.create({ data });
+  }
 }
 
-// Export singleton instance
-export const testDb = TestDatabase.getInstance();
+// Export a factory function instead of singleton
+export const createTestDatabase = (suiteName?: string) => new TestDatabase(suiteName);
+
+// Helper to create environments
+export async function createEnvironment(db: TestDatabase, data: any) {
+  const client = db.getClient();
+  return client.environment.create({ data });
+}
+
+// Export for backward compatibility
+export const testDb = new TestDatabase('default');

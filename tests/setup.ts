@@ -1,5 +1,5 @@
 /**
- * Jest test setup and global configuration
+ * Vitest test setup and global configuration
  * Runs before all tests to set up the testing environment
  */
 
@@ -13,26 +13,6 @@ dotenv.config({
 
 // Set test environment
 process.env.NODE_ENV = 'test';
-
-// Global test timeout
-jest.setTimeout(30000);
-
-// Global test hooks
-beforeAll(async () => {
-  // Global setup before all tests
-});
-
-afterAll(async () => {
-  // Global cleanup after all tests
-});
-
-beforeEach(async () => {
-  // Setup before each test
-});
-
-afterEach(async () => {
-  // Cleanup after each test
-});
 
 // Global error handler for unhandled rejections
 process.on('unhandledRejection', (reason, promise) => {

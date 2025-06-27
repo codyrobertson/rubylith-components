@@ -3,8 +3,10 @@
  * Tests password hashing, JWT token generation, and validation
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PasswordService, TokenService } from '../auth';
 import jwt from 'jsonwebtoken';
+import { config } from '../../config';
 
 describe('Authentication Utilities', () => {
   describe('PasswordService', () => {
@@ -85,9 +87,9 @@ describe('Authentication Utilities', () => {
         const plainPassword = 'SecurePassword123!';
         const invalidHash = 'not-a-valid-bcrypt-hash';
         
-        await expect(
-          PasswordService.verifyPassword(plainPassword, invalidHash)
-        ).rejects.toThrow();
+        const isValid = await PasswordService.verifyPassword(plainPassword, invalidHash);
+        
+        expect(isValid).toBe(false);
       });
 
       it('should be case sensitive', async () => {
@@ -307,10 +309,16 @@ describe('Authentication Utilities', () => {
     describe('edge cases', () => {
       it('should handle missing JWT_SECRET', () => {
         delete process.env.JWT_SECRET;
+        // Mock config to also not have JWT_SECRET 
+        const originalConfig = config.auth.jwtSecret;
+        (config as any).auth.jwtSecret = '';
 
         expect(() => {
           TokenService.generateAccessToken(mockUser);
-        }).toThrow();
+        }).toThrow('JWT_SECRET is not configured');
+        
+        // Restore config
+        (config as any).auth.jwtSecret = originalConfig;
       });
 
       it('should handle empty user id', () => {

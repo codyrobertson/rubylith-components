@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { BaseRepository, UserRepository, ComponentRepository, ContractRepository, EnvironmentRepository, RepositoryFactory } from '../repositories';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../../generated/prisma';
 import { testDb } from '../../../tests/utils/database';
 import { userFixtures } from '../../../tests/fixtures/users';
 import { componentFixtures } from '../../../tests/fixtures/components';

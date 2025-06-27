@@ -151,3 +151,9 @@ export class ApiServer {
 
 // Create and export server instance
 export const apiServer = new ApiServer();
+
+// Export function to create server for testing
+export function createServer(prismaClient?: any): Express {
+  const server = new ApiServer();
+  return server.getApp();
+}

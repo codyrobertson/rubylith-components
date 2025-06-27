@@ -19,7 +19,7 @@ import type {
 // Base Repository
 // =============================================================================
 
-abstract class BaseRepository {
+export abstract class BaseRepository {
   protected client: PrismaClient | null = null;
 
   protected async getClient(): Promise<PrismaClient> {
@@ -30,8 +30,28 @@ abstract class BaseRepository {
   }
 
   protected handleError(error: unknown, operation: string): never {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Database ${operation} failed: ${message}`);
+    // Handle Prisma-specific errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any;
+      
+      if (prismaError.code === 'P2002') {
+        const target = prismaError.meta?.target;
+        const targetStr = Array.isArray(target) ? target.join(', ') : 'field';
+        throw new Error(`Unique constraint violation on ${targetStr}`);
+      }
+      
+      if (prismaError.code === 'P2025') {
+        throw new Error('Record not found');
+      }
+    }
+    
+    // Handle regular errors
+    if (error instanceof Error) {
+      throw new Error(`Repository ${operation} failed: ${error.message}`);
+    }
+    
+    // Handle unknown errors
+    throw new Error(`Repository ${operation} failed`);
   }
 }
 
@@ -40,12 +60,26 @@ abstract class BaseRepository {
 // =============================================================================
 
 export class UserRepository extends BaseRepository {
-  async findAll(): Promise<User[]> {
+  async findAll(options?: {
+    where?: Prisma.UserWhereInput;
+    limit?: number;
+    offset?: number;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+  }): Promise<{ data: User[]; total: number }> {
     try {
       const client = await this.getClient();
-      return await client.user.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
+      
+      const [data, total] = await Promise.all([
+        client.user.findMany({
+          where: options?.where,
+          take: options?.limit,
+          skip: options?.offset,
+          orderBy: options?.orderBy || { createdAt: 'desc' },
+        }),
+        client.user.count({ where: options?.where }),
+      ]);
+      
+      return { data, total };
     } catch (error) {
       this.handleError(error, 'user findAll');
     }
@@ -123,12 +157,37 @@ export class UserRepository extends BaseRepository {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<User> {
     try {
       const client = await this.getClient();
-      await client.user.delete({ where: { id } });
+      return await client.user.update({
+        where: { id },
+        data: {
+          status: 'DELETED',
+          deletedAt: new Date(),
+        },
+      });
     } catch (error) {
       this.handleError(error, 'user delete');
+    }
+  }
+
+  async validatePassword(id: string, password: string): Promise<boolean> {
+    try {
+      const client = await this.getClient();
+      const user = await client.user.findUnique({
+        where: { id },
+        select: { password: true },
+      });
+      
+      if (!user) {
+        return false;
+      }
+      
+      const PasswordService = await import('../api/utils/auth').then(m => m.PasswordService);
+      return await PasswordService.verifyPassword(password, user.password);
+    } catch (error) {
+      return false;
     }
   }
 }
@@ -139,15 +198,17 @@ export class UserRepository extends BaseRepository {
 
 export class ComponentRepository extends BaseRepository {
   async findAll(options?: {
+    where?: Prisma.ComponentWhereInput;
     limit?: number;
     offset?: number;
+    include?: Prisma.ComponentInclude;
     type?: string;
     lifecycle?: string;
-  }): Promise<Component[]> {
+  }): Promise<{ data: Component[]; total: number }> {
     try {
       const client = await this.getClient();
 
-      const where: Prisma.ComponentWhereInput = {};
+      let where: Prisma.ComponentWhereInput = options?.where || {};
       if (options?.type) {
         where.type = options.type as Prisma.EnumComponentTypeFilter<'Component'>;
       }
@@ -155,18 +216,25 @@ export class ComponentRepository extends BaseRepository {
         where.lifecycle = options.lifecycle as Prisma.EnumComponentLifecycleFilter<'Component'>;
       }
 
-      return await client.component.findMany({
-        where,
-        ...(options?.limit !== undefined && { take: options.limit }),
-        ...(options?.offset !== undefined && { skip: options.offset }),
-        include: {
-          contract: true,
-          dependencies: true,
-          provides: true,
-          requires: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+      const include = options?.include || {
+        contract: true,
+        dependencies: true,
+        provides: true,
+        requires: true,
+      };
+
+      const [data, total] = await Promise.all([
+        client.component.findMany({
+          where,
+          take: options?.limit,
+          skip: options?.offset,
+          include,
+          orderBy: { createdAt: 'desc' },
+        }),
+        client.component.count({ where }),
+      ]);
+
+      return { data, total };
     } catch (error) {
       this.handleError(error, 'component findAll');
     }
@@ -591,42 +659,42 @@ export class RepositoryFactory {
   private static capabilityRepo: CapabilityRepository | null = null;
   private static mountPlanRepo: MountPlanRepository | null = null;
 
-  static getUserRepository(): UserRepository {
+  static createUserRepository(): UserRepository {
     if (!this.userRepo) {
       this.userRepo = new UserRepository();
     }
     return this.userRepo;
   }
 
-  static getComponentRepository(): ComponentRepository {
+  static createComponentRepository(): ComponentRepository {
     if (!this.componentRepo) {
       this.componentRepo = new ComponentRepository();
     }
     return this.componentRepo;
   }
 
-  static getContractRepository(): ContractRepository {
+  static createContractRepository(): ContractRepository {
     if (!this.contractRepo) {
       this.contractRepo = new ContractRepository();
     }
     return this.contractRepo;
   }
 
-  static getEnvironmentRepository(): EnvironmentRepository {
+  static createEnvironmentRepository(): EnvironmentRepository {
     if (!this.environmentRepo) {
       this.environmentRepo = new EnvironmentRepository();
     }
     return this.environmentRepo;
   }
 
-  static getCapabilityRepository(): CapabilityRepository {
+  static createCapabilityRepository(): CapabilityRepository {
     if (!this.capabilityRepo) {
       this.capabilityRepo = new CapabilityRepository();
     }
     return this.capabilityRepo;
   }
 
-  static getMountPlanRepository(): MountPlanRepository {
+  static createMountPlanRepository(): MountPlanRepository {
     if (!this.mountPlanRepo) {
       this.mountPlanRepo = new MountPlanRepository();
     }

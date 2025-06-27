@@ -51,7 +51,7 @@ export const validateRequest = (schema: ValidationSchema | AnyZodObject) => {
           message: err.message,
         }));
         
-        next(errors.validationError(formattedErrors));
+        next(errors.validation('Validation failed', formattedErrors));
       } else {
         next(error);
       }

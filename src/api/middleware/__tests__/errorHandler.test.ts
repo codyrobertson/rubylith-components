@@ -9,11 +9,12 @@ import { errorHandler, errors, AppError } from '../errorHandler';
 import { config } from '../../config';
 
 // Mock Express request, response, and next
-const mockRequest = (data: any = {}): Request => ({
-  path: '/api/test',
-  method: 'GET',
-  ...data,
-} as Request);
+const mockRequest = (data: any = {}): Request =>
+  ({
+    path: '/api/test',
+    method: 'GET',
+    ...data,
+  }) as Request;
 
 const mockResponse = (): Response => {
   const res = {} as Response;
@@ -178,7 +179,7 @@ describe('Error Handler Middleware', () => {
       const req = mockRequest();
       const res = mockResponse();
       const error = new Error('Test error');
-      
+
       // Mock development environment
       const originalEnv = config.server.env;
       config.server.env = 'development';
@@ -197,7 +198,7 @@ describe('Error Handler Middleware', () => {
       const req = mockRequest();
       const res = mockResponse();
       const error = new Error('Test error');
-      
+
       // Mock production environment
       const originalEnv = config.server.env;
       config.server.env = 'production';
@@ -219,10 +220,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(error, req, res, mockNext);
 
       // eslint-disable-next-line no-console
-      expect(console.error).toHaveBeenCalledWith(
-        'Non-operational error:',
-        error
-      );
+      expect(console.error).toHaveBeenCalledWith('Non-operational error:', error);
     });
 
     it('should not log operational errors', () => {
@@ -408,7 +406,7 @@ describe('Error Handler Middleware', () => {
       const res = mockResponse();
       const circularObj: any = { prop: 'value' };
       circularObj.self = circularObj;
-      
+
       const error = new AppError('Error with circular ref', 400, 'CIRCULAR_ERROR', circularObj);
 
       // Should not throw when handling circular reference

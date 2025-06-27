@@ -77,24 +77,77 @@ export class TokenService {
   private static readonly ACCESS_TOKEN_EXPIRES_IN = '15m';
   private static readonly REFRESH_TOKEN_EXPIRES_IN = '7d';
 
-  static generateTokenPair(user: User): TokenPair {
-    const payload: TokenPayload = {
+  static generateAccessToken(user: { id: string; role: string }): string {
+    // Check if JWT_SECRET was explicitly deleted (undefined vs not set)
+    if ('JWT_SECRET' in process.env && !process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+    
+    const jwtSecret = process.env.JWT_SECRET || config.auth.jwtSecret;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+
+    const payload = {
       userId: user.id,
-      email: user.email,
       role: user.role,
+      type: 'access',
+      // Add nanosecond precision to ensure uniqueness
+      nonce: Date.now() + Math.random(),
     };
 
-    const accessToken = jwt.sign(payload, config.auth.jwtSecret, {
-      expiresIn: this.ACCESS_TOKEN_EXPIRES_IN,
+    return jwt.sign(payload, jwtSecret, {
+      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || this.ACCESS_TOKEN_EXPIRES_IN,
       issuer: config.auth.jwtIssuer,
       audience: config.auth.jwtAudience,
     });
+  }
 
-    const refreshToken = jwt.sign(payload, config.auth.jwtRefreshSecret, {
-      expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
+  static generateRefreshToken(user: { id: string; role: string }): string {
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || config.auth.jwtRefreshSecret;
+    if (!jwtRefreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET is not configured');
+    }
+
+    const payload = {
+      userId: user.id,
+      type: 'refresh',
+      nonce: Date.now() + Math.random(),
+    };
+
+    return jwt.sign(payload, jwtRefreshSecret, {
+      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || this.REFRESH_TOKEN_EXPIRES_IN,
       issuer: config.auth.jwtIssuer,
       audience: config.auth.jwtAudience,
     });
+  }
+
+  static verifyToken(token: string): any {
+    const jwtSecret = process.env.JWT_SECRET || config.auth.jwtSecret;
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || config.auth.jwtRefreshSecret;
+    
+    try {
+      // Try to verify as access token first
+      return jwt.verify(token, jwtSecret, {
+        issuer: config.auth.jwtIssuer,
+        audience: config.auth.jwtAudience,
+      });
+    } catch {
+      // If that fails, try as refresh token
+      try {
+        return jwt.verify(token, jwtRefreshSecret, {
+          issuer: config.auth.jwtIssuer,
+          audience: config.auth.jwtAudience,
+        });
+      } catch (error) {
+        throw new Error('Invalid or expired token');
+      }
+    }
+  }
+
+  static generateTokenPair(user: User): TokenPair {
+    const accessToken = this.generateAccessToken(user);
+    const refreshToken = this.generateRefreshToken(user);
 
     return {
       accessToken,
@@ -124,21 +177,6 @@ export class TokenService {
     }
   }
 
-  static generateAccessToken(payload: TokenPayload): string {
-    return jwt.sign(
-      {
-        userId: payload.userId,
-        email: payload.email,
-        role: payload.role,
-      },
-      config.auth.jwtSecret,
-      {
-        expiresIn: this.ACCESS_TOKEN_EXPIRES_IN,
-        issuer: config.auth.jwtIssuer,
-        audience: config.auth.jwtAudience,
-      }
-    );
-  }
 
   static extractTokenFromHeader(authHeader: string | undefined): string | null {
     if (!authHeader) {return null;}
