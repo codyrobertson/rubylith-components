@@ -82,7 +82,7 @@ export class TokenService {
     if ('JWT_SECRET' in process.env && !process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not configured');
     }
-    
+
     const jwtSecret = process.env.JWT_SECRET || config.auth.jwtSecret;
     if (!jwtSecret) {
       throw new Error('JWT_SECRET is not configured');
@@ -125,7 +125,7 @@ export class TokenService {
   static verifyToken(token: string): any {
     const jwtSecret = process.env.JWT_SECRET || config.auth.jwtSecret;
     const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || config.auth.jwtRefreshSecret;
-    
+
     try {
       // Try to verify as access token first
       return jwt.verify(token, jwtSecret, {
@@ -177,23 +177,26 @@ export class TokenService {
     }
   }
 
-
   static extractTokenFromHeader(authHeader: string | undefined): string | null {
-    if (!authHeader) {return null;}
-    
+    if (!authHeader) {
+      return null;
+    }
+
     const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
       return null;
     }
-    
+
     return parts[1] || null;
   }
 
   static getTokenExpiration(token: string): Date | null {
     try {
       const decoded = jwt.decode(token) as TokenPayload;
-      if (!decoded || !decoded.exp) {return null;}
-      
+      if (!decoded || !decoded.exp) {
+        return null;
+      }
+
       return new Date(decoded.exp * 1000);
     } catch {
       return null;
@@ -233,6 +236,10 @@ export class TokenExpiredError extends AuthenticationError {
 
 export class InsufficientPermissionsError extends AuthorizationError {
   constructor(requiredRole?: string) {
-    super(requiredRole ? `Insufficient permissions. Required role: ${requiredRole}` : 'Insufficient permissions');
+    super(
+      requiredRole
+        ? `Insufficient permissions. Required role: ${requiredRole}`
+        : 'Insufficient permissions'
+    );
   }
 }

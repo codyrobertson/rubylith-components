@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Ultra-strict pre-commit validation
 echo "🔍 Running ultra-strict pre-commit validation..."
 

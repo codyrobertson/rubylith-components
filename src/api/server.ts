@@ -32,14 +32,16 @@ export class ApiServer {
   private setupMiddleware(): void {
     // Security middleware
     this.app.use(helmet());
-    
+
     // CORS configuration
-    this.app.use(cors({
-      origin: config.cors.origins,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    }));
+    this.app.use(
+      cors({
+        origin: config.cors.origins,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })
+    );
 
     // Body parsing
     this.app.use(express.json({ limit: config.server.bodyLimit }));
@@ -65,22 +67,28 @@ export class ApiServer {
         res.json({ status: 'ready', database: 'connected', timestamp: new Date().toISOString() });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        res.status(503).json({ status: 'not ready', database: 'disconnected', error: errorMessage });
+        res
+          .status(503)
+          .json({ status: 'not ready', database: 'disconnected', error: errorMessage });
       }
     });
 
     // API Documentation
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-      explorer: true,
-      customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'Rubylith Component Registry API',
-      swaggerOptions: {
-        persistAuthorization: true,
-        displayRequestDuration: true,
-        filter: true,
-        tryItOutEnabled: true,
-      },
-    }));
+    this.app.use(
+      '/api-docs',
+      swaggerUi.serve,
+      swaggerUi.setup(specs, {
+        explorer: true,
+        customCss: '.swagger-ui .topbar { display: none }',
+        customSiteTitle: 'Rubylith Component Registry API',
+        swaggerOptions: {
+          persistAuthorization: true,
+          displayRequestDuration: true,
+          filter: true,
+          tryItOutEnabled: true,
+        },
+      })
+    );
 
     // API specification JSON endpoint
     this.app.get('/api-docs.json', (_req, res) => {
@@ -116,7 +124,9 @@ export class ApiServer {
 
       // Start server
       this.server = this.app.listen(config.server.port, () => {
-        console.log(`API Server running on port ${config.server.port} in ${config.server.env} mode`);
+        console.log(
+          `API Server running on port ${config.server.port} in ${config.server.env} mode`
+        );
       });
 
       // Graceful shutdown handlers
@@ -130,7 +140,7 @@ export class ApiServer {
 
   private async shutdown(): Promise<void> {
     console.log('Gracefully shutting down...');
-    
+
     if (this.server) {
       this.server.close(() => {
         console.log('HTTP server closed');
@@ -140,7 +150,7 @@ export class ApiServer {
     // Close database connections
     const { closeDatabase } = await import('../database');
     await closeDatabase();
-    
+
     process.exit(0);
   }
 

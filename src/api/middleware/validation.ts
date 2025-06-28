@@ -4,7 +4,7 @@
  */
 
 import type { Request, Response, NextFunction } from 'express';
-import type { AnyZodObject} from 'zod';
+import type { AnyZodObject } from 'zod';
 import { ZodError } from 'zod';
 import { errors } from './errorHandler';
 
@@ -19,25 +19,25 @@ export const validateRequest = (schema: ValidationSchema | AnyZodObject) => {
     try {
       // Handle legacy single schema format (assume it's for body)
       if ('_def' in schema) {
-        const validated = await (schema).parseAsync(req.body);
+        const validated = await schema.parseAsync(req.body);
         req.body = validated;
         return next();
       }
-      
+
       // Handle object with specific validation schemas
       const validationSchema = schema;
-      
+
       // Validate each part if schema is provided
       if (validationSchema.body) {
         const validated = await validationSchema.body.parseAsync(req.body);
         req.body = validated;
       }
-      
+
       if (validationSchema.query) {
         const validated = await validationSchema.query.parseAsync(req.query);
         req.query = validated;
       }
-      
+
       if (validationSchema.params) {
         const validated = await validationSchema.params.parseAsync(req.params);
         req.params = validated;
@@ -46,11 +46,11 @@ export const validateRequest = (schema: ValidationSchema | AnyZodObject) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const formattedErrors = error.errors.map(err => ({
+        const formattedErrors = error.errors.map((err) => ({
           path: err.path.join('.'),
           message: err.message,
         }));
-        
+
         next(errors.validation('Validation failed', formattedErrors));
       } else {
         next(error);

@@ -4,7 +4,14 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
-import { BaseRepository, UserRepository, ComponentRepository, ContractRepository, EnvironmentRepository, RepositoryFactory } from '../repositories';
+import {
+  BaseRepository,
+  UserRepository,
+  ComponentRepository,
+  ContractRepository,
+  EnvironmentRepository,
+  RepositoryFactory,
+} from '../repositories';
 import { PrismaClient } from '../../../generated/prisma';
 import { testDb } from '../../../tests/utils/database';
 import { userFixtures } from '../../../tests/fixtures/users';
@@ -49,19 +56,19 @@ describe('Repository Classes', () => {
     it('should get Prisma client instance', async () => {
       const repo = new TestRepository();
       const client = await repo.testGetClient();
-      
+
       expect(client).toBeInstanceOf(PrismaClient);
     });
 
     it('should handle Prisma known error codes', () => {
       const repo = new TestRepository();
-      
+
       // Test unique constraint violation
       const p2002Error = {
         code: 'P2002',
         meta: { target: ['email'] },
       };
-      
+
       expect(() => repo.testHandleError(p2002Error, 'create')).toThrow(
         'Unique constraint violation on email'
       );
@@ -70,16 +77,14 @@ describe('Repository Classes', () => {
       const p2025Error = {
         code: 'P2025',
       };
-      
-      expect(() => repo.testHandleError(p2025Error, 'update')).toThrow(
-        'Record not found'
-      );
+
+      expect(() => repo.testHandleError(p2025Error, 'update')).toThrow('Record not found');
     });
 
     it('should handle generic errors', () => {
       const repo = new TestRepository();
       const error = new Error('Generic error');
-      
+
       expect(() => repo.testHandleError(error, 'operation')).toThrow(
         'Repository operation failed: Generic error'
       );
@@ -88,10 +93,8 @@ describe('Repository Classes', () => {
     it('should handle unknown errors', () => {
       const repo = new TestRepository();
       const error = { unknown: 'error' };
-      
-      expect(() => repo.testHandleError(error, 'operation')).toThrow(
-        'Repository operation failed'
-      );
+
+      expect(() => repo.testHandleError(error, 'operation')).toThrow('Repository operation failed');
     });
   });
 
@@ -135,10 +138,8 @@ describe('Repository Classes', () => {
         };
 
         await userRepo.create(userData);
-        
-        await expect(userRepo.create(userData)).rejects.toThrow(
-          'Unique constraint violation'
-        );
+
+        await expect(userRepo.create(userData)).rejects.toThrow('Unique constraint violation');
       });
     });
 
@@ -162,7 +163,7 @@ describe('Repository Classes', () => {
 
       it('should return null for non-existent user', async () => {
         const found = await userRepo.findById('non-existent-id');
-        
+
         expect(found).toBeNull();
       });
     });
@@ -185,7 +186,7 @@ describe('Repository Classes', () => {
 
       it('should return null for non-existent email', async () => {
         const found = await userRepo.findByEmail('nonexistent@example.com');
-        
+
         expect(found).toBeNull();
       });
     });
@@ -239,7 +240,7 @@ describe('Repository Classes', () => {
           orderBy: { createdAt: 'desc' },
         });
 
-        const dates = result.data.map(u => u.createdAt.getTime());
+        const dates = result.data.map((u) => u.createdAt.getTime());
         expect(dates).toEqual([...dates].sort((a, b) => b - a));
       });
     });
@@ -267,9 +268,7 @@ describe('Repository Classes', () => {
       });
 
       it('should throw error for non-existent user', async () => {
-        await expect(
-          userRepo.update('non-existent-id', { firstName: 'New' })
-        ).rejects.toThrow();
+        await expect(userRepo.update('non-existent-id', { firstName: 'New' })).rejects.toThrow();
       });
     });
 
@@ -309,7 +308,7 @@ describe('Repository Classes', () => {
         });
 
         const isValid = await userRepo.validatePassword(user.id, plainPassword);
-        
+
         expect(isValid).toBe(true);
       });
 
@@ -323,13 +322,13 @@ describe('Repository Classes', () => {
         });
 
         const isValid = await userRepo.validatePassword(user.id, 'wrong-password');
-        
+
         expect(isValid).toBe(false);
       });
 
       it('should return false for non-existent user', async () => {
         const isValid = await userRepo.validatePassword('non-existent', 'password');
-        
+
         expect(isValid).toBe(false);
       });
     });
@@ -341,7 +340,7 @@ describe('Repository Classes', () => {
 
     beforeEach(async () => {
       componentRepo = new ComponentRepository();
-      
+
       // Create test user
       const userRepo = new UserRepository();
       testUser = await userRepo.create({
@@ -379,7 +378,7 @@ describe('Repository Classes', () => {
         };
 
         await componentRepo.create(componentData);
-        
+
         await expect(componentRepo.create(componentData)).rejects.toThrow(
           'Unique constraint violation'
         );
@@ -393,21 +392,15 @@ describe('Repository Classes', () => {
           createdById: testUser.id,
         });
 
-        const found = await componentRepo.findByNameAndVersion(
-          created.name,
-          created.version
-        );
+        const found = await componentRepo.findByNameAndVersion(created.name, created.version);
 
         expect(found).toBeDefined();
         expect(found?.id).toBe(created.id);
       });
 
       it('should return null for non-existent component', async () => {
-        const found = await componentRepo.findByNameAndVersion(
-          'non-existent',
-          '1.0.0'
-        );
-        
+        const found = await componentRepo.findByNameAndVersion('non-existent', '1.0.0');
+
         expect(found).toBeNull();
       });
     });
@@ -442,7 +435,7 @@ describe('Repository Classes', () => {
         });
 
         expect(result.data).toHaveLength(2);
-        result.data.forEach(comp => {
+        result.data.forEach((comp) => {
           expect(comp.type).toBe('SERVICE');
         });
       });
@@ -461,32 +454,32 @@ describe('Repository Classes', () => {
   describe('RepositoryFactory', () => {
     it('should create user repository', () => {
       const repo = RepositoryFactory.createUserRepository();
-      
+
       expect(repo).toBeInstanceOf(UserRepository);
     });
 
     it('should create component repository', () => {
       const repo = RepositoryFactory.createComponentRepository();
-      
+
       expect(repo).toBeInstanceOf(ComponentRepository);
     });
 
     it('should create contract repository', () => {
       const repo = RepositoryFactory.createContractRepository();
-      
+
       expect(repo).toBeInstanceOf(ContractRepository);
     });
 
     it('should create environment repository', () => {
       const repo = RepositoryFactory.createEnvironmentRepository();
-      
+
       expect(repo).toBeInstanceOf(EnvironmentRepository);
     });
 
     it('should return singleton instances', () => {
       const repo1 = RepositoryFactory.createUserRepository();
       const repo2 = RepositoryFactory.createUserRepository();
-      
+
       expect(repo1).toBe(repo2);
     });
   });

@@ -41,7 +41,7 @@ describe('Admin Endpoints', () => {
           userFixtures.maintainer,
           userFixtures.contributor,
           userFixtures.consumer,
-          userFixtures.auditor
+          userFixtures.auditor,
         ];
 
         for (const user of users) {
@@ -65,9 +65,7 @@ describe('Admin Endpoints', () => {
       });
 
       it('should require authentication', async () => {
-        await request(app)
-          .get('/api/v1/admin/users')
-          .expect(401);
+        await request(app).get('/api/v1/admin/users').expect(401);
       });
 
       it('should require owner or auditor role', async () => {
@@ -103,7 +101,7 @@ describe('Admin Endpoints', () => {
           page: 1,
           limit: 2,
           total: 5,
-          totalPages: 3
+          totalPages: 3,
         });
       });
 
@@ -121,7 +119,7 @@ describe('Admin Endpoints', () => {
         // Create an inactive user
         await testDb.createUser({
           ...createUserFixture(),
-          status: 'INACTIVE'
+          status: 'INACTIVE',
         });
 
         const response = await apiHelper
@@ -176,7 +174,7 @@ describe('Admin Endpoints', () => {
           id: testUser.id,
           email: testUser.email,
           role: testUser.role,
-          status: testUser.status
+          status: testUser.status,
         });
         expect(response.body.data).not.toHaveProperty('password');
       });
@@ -227,14 +225,18 @@ describe('Admin Endpoints', () => {
 
       it('should not allow non-owners to update users', async () => {
         await apiHelper
-          .authenticatedRequest('patch', `/api/v1/admin/users/${testUser.id}`, userFixtures.maintainer)
+          .authenticatedRequest(
+            'patch',
+            `/api/v1/admin/users/${testUser.id}`,
+            userFixtures.maintainer
+          )
           .send({ role: 'OWNER' })
           .expect(403);
       });
 
       it('should prevent users from updating their own role', async () => {
         const ownerUser = await testDb.createUser(userFixtures.owner);
-        
+
         await apiHelper
           .authenticatedRequest('patch', `/api/v1/admin/users/${ownerUser.id}`, userFixtures.owner)
           .send({ role: 'CONTRIBUTOR' })
@@ -275,7 +277,7 @@ describe('Admin Endpoints', () => {
       it('should prevent deleting owner accounts', async () => {
         const ownerUser = await testDb.createUser({
           ...createUserFixture(),
-          role: 'OWNER'
+          role: 'OWNER',
         });
 
         await apiHelper
@@ -287,7 +289,7 @@ describe('Admin Endpoints', () => {
         // Create components owned by the user
         await testDb.createComponent({
           ...componentFixtures.apiGateway,
-          createdById: testUser.id
+          createdById: testUser.id,
         });
 
         const response = await apiHelper
@@ -309,29 +311,29 @@ describe('Admin Endpoints', () => {
           userId: userFixtures.owner.id,
           action: 'USER_LOGIN',
           resource: 'auth',
-          details: { ip: '192.168.1.1', userAgent: 'Mozilla/5.0' }
+          details: { ip: '192.168.1.1', userAgent: 'Mozilla/5.0' },
         },
         {
           userId: userFixtures.maintainer.id,
           action: 'COMPONENT_CREATE',
           resource: 'component',
           resourceId: 'comp-123',
-          details: { name: 'api-gateway', version: '1.0.0' }
+          details: { name: 'api-gateway', version: '1.0.0' },
         },
         {
           userId: userFixtures.contributor.id,
           action: 'CONTRACT_UPDATE',
           resource: 'contract',
           resourceId: 'contract-456',
-          details: { fields: ['schema', 'version'] }
+          details: { fields: ['schema', 'version'] },
         },
         {
           userId: userFixtures.owner.id,
           action: 'USER_DELETE',
           resource: 'user',
           resourceId: 'user-789',
-          details: { deletedUser: 'test@example.com' }
-        }
+          details: { deletedUser: 'test@example.com' },
+        },
       ];
 
       for (const event of events) {
@@ -404,7 +406,7 @@ describe('Admin Endpoints', () => {
           .authenticatedRequest('get', '/api/v1/admin/audit', userFixtures.owner)
           .query({
             startDate: yesterday.toISOString(),
-            endDate: tomorrow.toISOString()
+            endDate: tomorrow.toISOString(),
           })
           .expect(200);
 
@@ -468,8 +470,8 @@ describe('Admin Endpoints', () => {
           .send({
             format: 'csv',
             filters: {
-              startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-            }
+              startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            },
           })
           .expect(200);
 
@@ -482,7 +484,7 @@ describe('Admin Endpoints', () => {
           .authenticatedRequest('post', '/api/v1/admin/audit/export', userFixtures.owner)
           .send({
             format: 'json',
-            filters: {}
+            filters: {},
           })
           .expect(200);
 
@@ -587,7 +589,7 @@ describe('Admin Endpoints', () => {
           .send({
             enabled: true,
             message: 'System upgrade in progress',
-            estimatedDuration: '2 hours'
+            estimatedDuration: '2 hours',
           })
           .expect(200);
 
@@ -675,12 +677,12 @@ describe('Admin Endpoints', () => {
           .send({
             features: {
               enableRegistration: false,
-              requireEmailVerification: true
+              requireEmailVerification: true,
             },
             limits: {
               maxComponentsPerUser: 100,
-              maxContractsPerComponent: 10
-            }
+              maxContractsPerComponent: 10,
+            },
           })
           .expect(200);
 
@@ -695,8 +697,8 @@ describe('Admin Endpoints', () => {
           .send({
             limits: {
               maxComponentsPerUser: -1, // Invalid
-              maxContractsPerComponent: 'invalid' // Invalid type
-            }
+              maxContractsPerComponent: 'invalid', // Invalid type
+            },
           })
           .expect(400);
 
@@ -707,7 +709,7 @@ describe('Admin Endpoints', () => {
         const response = await apiHelper
           .authenticatedRequest('patch', '/api/v1/admin/system/config', userFixtures.owner)
           .send({
-            features: { enableDebugMode: true }
+            features: { enableDebugMode: true },
           })
           .expect(200);
 
@@ -724,7 +726,7 @@ describe('Admin Endpoints', () => {
         { method: 'delete', path: '/api/v1/admin/users/123', allowedRoles: ['OWNER'] },
         { method: 'get', path: '/api/v1/admin/audit', allowedRoles: ['OWNER', 'AUDITOR'] },
         { method: 'get', path: '/api/v1/admin/system/info', allowedRoles: ['OWNER'] },
-        { method: 'post', path: '/api/v1/admin/system/maintenance', allowedRoles: ['OWNER'] }
+        { method: 'post', path: '/api/v1/admin/system/maintenance', allowedRoles: ['OWNER'] },
       ];
 
       const roles = ['OWNER', 'MAINTAINER', 'CONTRIBUTOR', 'CONSUMER', 'AUDITOR'];
@@ -739,8 +741,11 @@ describe('Admin Endpoints', () => {
             continue;
           }
 
-          const response = await apiHelper
-            .authenticatedRequest(endpoint.method, endpoint.path, user);
+          const response = await apiHelper.authenticatedRequest(
+            endpoint.method,
+            endpoint.path,
+            user
+          );
 
           if (expectedStatus === 403) {
             expect(response.status).toBe(403);
@@ -767,12 +772,12 @@ describe('Admin Endpoints', () => {
       await testDb.createComponent({
         ...componentFixtures.apiGateway,
         createdById: userFixtures.owner.id,
-        createdAt: yesterday
+        createdAt: yesterday,
       });
       await testDb.createComponent({
         ...componentFixtures.authService,
         createdById: userFixtures.maintainer.id,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       // Create audit events
@@ -780,7 +785,7 @@ describe('Admin Endpoints', () => {
         userId: userFixtures.owner.id,
         action: 'USER_LOGIN',
         resource: 'auth',
-        timestamp: yesterday
+        timestamp: yesterday,
       });
     });
 
@@ -793,11 +798,11 @@ describe('Admin Endpoints', () => {
       expect(response.body.data.summary).toHaveProperty('totalUsers', 3);
       expect(response.body.data.summary).toHaveProperty('totalComponents', 2);
       expect(response.body.data.summary).toHaveProperty('activeUsers');
-      
+
       expect(response.body.data).toHaveProperty('trends');
       expect(response.body.data.trends).toHaveProperty('userGrowth');
       expect(response.body.data.trends).toHaveProperty('componentGrowth');
-      
+
       expect(response.body.data).toHaveProperty('recentActivity');
       expect(response.body.data).toHaveProperty('systemStatus');
     });
@@ -807,7 +812,7 @@ describe('Admin Endpoints', () => {
         .authenticatedRequest('get', '/api/v1/admin/dashboard', userFixtures.owner)
         .query({
           startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          endDate: new Date().toISOString()
+          endDate: new Date().toISOString(),
         })
         .expect(200);
 
@@ -836,25 +841,25 @@ describe('Admin Endpoints', () => {
         apiHelper.authenticatedRequest('get', '/api/v1/admin/users', userFixtures.owner),
         apiHelper.authenticatedRequest('get', '/api/v1/admin/audit', userFixtures.auditor),
         apiHelper.authenticatedRequest('get', '/api/v1/admin/system/stats', userFixtures.owner),
-        apiHelper.authenticatedRequest('get', '/api/v1/admin/dashboard', userFixtures.owner)
+        apiHelper.authenticatedRequest('get', '/api/v1/admin/dashboard', userFixtures.owner),
       ];
 
       const results = await Promise.allSettled(operations);
-      const successful = results.filter(r => r.status === 'fulfilled');
-      
+      const successful = results.filter((r) => r.status === 'fulfilled');
+
       expect(successful.length).toBe(4);
     });
 
     it('should rate limit admin endpoints', async () => {
       // Make multiple rapid requests
-      const requests = Array(20).fill(null).map(() => 
-        apiHelper.authenticatedRequest('get', '/api/v1/admin/users', userFixtures.owner)
-      );
+      const requests = Array(20)
+        .fill(null)
+        .map(() =>
+          apiHelper.authenticatedRequest('get', '/api/v1/admin/users', userFixtures.owner)
+        );
 
       const results = await Promise.allSettled(requests);
-      const rateLimited = results.filter(r => 
-        r.status === 'fulfilled' && r.value.status === 429
-      );
+      const rateLimited = results.filter((r) => r.status === 'fulfilled' && r.value.status === 429);
 
       expect(rateLimited.length).toBeGreaterThan(0);
     });

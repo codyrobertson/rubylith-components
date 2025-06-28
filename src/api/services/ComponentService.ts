@@ -44,10 +44,7 @@ export class ComponentService {
     });
   }
 
-  async findByNameAndVersion(
-    name: string,
-    version: string
-  ): Promise<Component | null> {
+  async findByNameAndVersion(name: string, version: string): Promise<Component | null> {
     return this.prisma.component.findUnique({
       where: {
         name_version: { name, version },
@@ -81,10 +78,7 @@ export class ComponentService {
     return { data, total };
   }
 
-  async update(
-    id: string,
-    data: Prisma.ComponentUpdateInput
-  ): Promise<Component> {
+  async update(id: string, data: Prisma.ComponentUpdateInput): Promise<Component> {
     // If updating name or version, check for conflicts
     if (data.name || data.version) {
       const component = await this.findById(id);
@@ -97,11 +91,7 @@ export class ComponentService {
 
       const existing = await this.prisma.component.findFirst({
         where: {
-          AND: [
-            { name: newName },
-            { version: newVersion },
-            { NOT: { id } },
-          ],
+          AND: [{ name: newName }, { version: newVersion }, { NOT: { id } }],
         },
       });
 

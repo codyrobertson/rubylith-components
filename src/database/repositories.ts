@@ -33,23 +33,23 @@ export abstract class BaseRepository {
     // Handle Prisma-specific errors
     if (error && typeof error === 'object' && 'code' in error) {
       const prismaError = error as any;
-      
+
       if (prismaError.code === 'P2002') {
         const target = prismaError.meta?.target;
         const targetStr = Array.isArray(target) ? target.join(', ') : 'field';
         throw new Error(`Unique constraint violation on ${targetStr}`);
       }
-      
+
       if (prismaError.code === 'P2025') {
         throw new Error('Record not found');
       }
     }
-    
+
     // Handle regular errors
     if (error instanceof Error) {
       throw new Error(`Repository ${operation} failed: ${error.message}`);
     }
-    
+
     // Handle unknown errors
     throw new Error(`Repository ${operation} failed`);
   }
@@ -68,7 +68,7 @@ export class UserRepository extends BaseRepository {
   }): Promise<{ data: User[]; total: number }> {
     try {
       const client = await this.getClient();
-      
+
       const [data, total] = await Promise.all([
         client.user.findMany({
           where: options?.where,
@@ -78,7 +78,7 @@ export class UserRepository extends BaseRepository {
         }),
         client.user.count({ where: options?.where }),
       ]);
-      
+
       return { data, total };
     } catch (error) {
       this.handleError(error, 'user findAll');
@@ -179,12 +179,12 @@ export class UserRepository extends BaseRepository {
         where: { id },
         select: { password: true },
       });
-      
+
       if (!user) {
         return false;
       }
-      
-      const PasswordService = await import('../api/utils/auth').then(m => m.PasswordService);
+
+      const PasswordService = await import('../api/utils/auth').then((m) => m.PasswordService);
       return await PasswordService.verifyPassword(password, user.password);
     } catch (error) {
       return false;

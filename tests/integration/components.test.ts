@@ -20,7 +20,7 @@ describe('Component API Integration Tests', () => {
     testDb = new TestDatabase();
     await testDb.setup();
     prisma = testDb.prisma;
-    
+
     app = createServer(prisma);
     apiHelper = new ApiTestHelper(app);
     componentService = new ComponentService(prisma);
@@ -41,7 +41,7 @@ describe('Component API Integration Tests', () => {
   describe('POST /api/v1/components', () => {
     it('should create a new component with valid data', async () => {
       const componentData = createComponentFixture();
-      
+
       const response = await apiHelper
         .authenticatedRequest('post', '/api/v1/components', userFixtures.developer.email)
         .send(componentData)
@@ -54,8 +54,8 @@ describe('Component API Integration Tests', () => {
         status: 'DRAFT',
         metadata: componentData.metadata,
         createdBy: {
-          email: userFixtures.developer.email
-        }
+          email: userFixtures.developer.email,
+        },
       });
       expect(response.body.id).toBeDefined();
       expect(response.body.createdAt).toBeDefined();
@@ -63,16 +63,13 @@ describe('Component API Integration Tests', () => {
 
     it('should reject component creation without authentication', async () => {
       const componentData = createComponentFixture();
-      
-      await request(app)
-        .post('/api/v1/components')
-        .send(componentData)
-        .expect(401);
+
+      await request(app).post('/api/v1/components').send(componentData).expect(401);
     });
 
     it('should reject component creation with viewer role', async () => {
       const componentData = createComponentFixture();
-      
+
       await apiHelper
         .authenticatedRequest('post', '/api/v1/components', userFixtures.viewer.email)
         .send(componentData)
@@ -81,7 +78,7 @@ describe('Component API Integration Tests', () => {
 
     it('should reject duplicate name:version combination', async () => {
       const componentData = componentFixtures.apiGateway;
-      
+
       // Create first component
       await apiHelper
         .authenticatedRequest('post', '/api/v1/components', userFixtures.developer.email)
@@ -102,7 +99,7 @@ describe('Component API Integration Tests', () => {
         name: 'a', // Too short
         version: 'invalid-version', // Invalid semantic version
         type: 'INVALID_TYPE',
-        metadata: 'not-an-object'
+        metadata: 'not-an-object',
       };
 
       const response = await apiHelper
@@ -124,14 +121,14 @@ describe('Component API Integration Tests', () => {
             ports: [8080, 8443],
             environment: {
               NODE_ENV: 'production',
-              LOG_LEVEL: 'info'
-            }
+              LOG_LEVEL: 'info',
+            },
           },
           dependencies: {
             runtime: ['node:18', 'nginx:latest'],
-            development: ['jest', 'typescript']
-          }
-        }
+            development: ['jest', 'typescript'],
+          },
+        },
       };
 
       const response = await apiHelper
@@ -151,7 +148,7 @@ describe('Component API Integration Tests', () => {
         componentFixtures.authService,
         componentFixtures.database,
         createComponentFixture({ type: 'BACKEND', status: 'ACTIVE' }),
-        createComponentFixture({ type: 'FRONTEND', status: 'DEPRECATED' })
+        createComponentFixture({ type: 'FRONTEND', status: 'DEPRECATED' }),
       ];
 
       for (const component of components) {
@@ -170,7 +167,7 @@ describe('Component API Integration Tests', () => {
         page: 1,
         limit: 3,
         total: 5,
-        totalPages: 2
+        totalPages: 2,
       });
     });
 
@@ -230,9 +227,7 @@ describe('Component API Integration Tests', () => {
     });
 
     it('should work without authentication for public access', async () => {
-      const response = await request(app)
-        .get('/api/v1/components')
-        .expect(200);
+      const response = await request(app).get('/api/v1/components').expect(200);
 
       expect(response.body.data).toBeDefined();
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -251,14 +246,18 @@ describe('Component API Integration Tests', () => {
 
     it('should retrieve component by ID', async () => {
       const response = await apiHelper
-        .authenticatedRequest('get', `/api/v1/components/${testComponent.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.viewer.email
+        )
         .expect(200);
 
       expect(response.body).toMatchObject({
         id: testComponent.id,
         name: testComponent.name,
         version: testComponent.version,
-        type: testComponent.type
+        type: testComponent.type,
       });
     });
 
@@ -273,7 +272,11 @@ describe('Component API Integration Tests', () => {
 
     it('should return 404 for non-existent component', async () => {
       const response = await apiHelper
-        .authenticatedRequest('get', '/api/v1/components/non-existent-id', userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          '/api/v1/components/non-existent-id',
+          userFixtures.viewer.email
+        )
         .expect(404);
 
       expect(response.body.error).toContain('Component not found');
@@ -281,7 +284,11 @@ describe('Component API Integration Tests', () => {
 
     it('should include related data when requested', async () => {
       const response = await apiHelper
-        .authenticatedRequest('get', `/api/v1/components/${testComponent.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.viewer.email
+        )
         .query({ includeCreator: true, includeContracts: true })
         .expect(200);
 
@@ -291,9 +298,7 @@ describe('Component API Integration Tests', () => {
     });
 
     it('should work without authentication for public access', async () => {
-      await request(app)
-        .get(`/api/v1/components/${testComponent.id}`)
-        .expect(200);
+      await request(app).get(`/api/v1/components/${testComponent.id}`).expect(200);
     });
   });
 
@@ -313,12 +318,16 @@ describe('Component API Integration Tests', () => {
         metadata: {
           ...testComponent.metadata,
           updated: true,
-          description: 'Updated description'
-        }
+          description: 'Updated description',
+        },
       };
 
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${testComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.developer.email
+        )
         .send(updates)
         .expect(200);
 
@@ -337,7 +346,11 @@ describe('Component API Integration Tests', () => {
 
     it('should require developer or owner role', async () => {
       await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${testComponent.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.viewer.email
+        )
         .send({ status: 'ACTIVE' })
         .expect(403);
     });
@@ -345,11 +358,15 @@ describe('Component API Integration Tests', () => {
     it('should validate update data', async () => {
       const invalidUpdates = {
         status: 'INVALID_STATUS',
-        version: 'not-a-version'
+        version: 'not-a-version',
       };
 
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${testComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.developer.email
+        )
         .send(invalidUpdates)
         .expect(400);
 
@@ -365,10 +382,14 @@ describe('Component API Integration Tests', () => {
 
       // Try to update to existing name:version
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${anotherComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${anotherComponent.id}`,
+          userFixtures.developer.email
+        )
         .send({
           name: testComponent.name,
-          version: testComponent.version
+          version: testComponent.version,
         })
         .expect(409);
 
@@ -377,7 +398,11 @@ describe('Component API Integration Tests', () => {
 
     it('should handle partial updates', async () => {
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${testComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.developer.email
+        )
         .send({ status: 'DEPRECATED' })
         .expect(200);
 
@@ -399,34 +424,52 @@ describe('Component API Integration Tests', () => {
 
     it('should delete component with owner role', async () => {
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/components/${testComponent.id}`, userFixtures.owner.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.owner.email
+        )
         .expect(204);
 
       // Verify deletion
       await apiHelper
-        .authenticatedRequest('get', `/api/v1/components/${testComponent.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.viewer.email
+        )
         .expect(404);
     });
 
     it('should require authentication', async () => {
-      await request(app)
-        .delete(`/api/v1/components/${testComponent.id}`)
-        .expect(401);
+      await request(app).delete(`/api/v1/components/${testComponent.id}`).expect(401);
     });
 
     it('should require owner role', async () => {
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/components/${testComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.developer.email
+        )
         .expect(403);
 
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/components/${testComponent.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.viewer.email
+        )
         .expect(403);
     });
 
     it('should return 404 for non-existent component', async () => {
       await apiHelper
-        .authenticatedRequest('delete', '/api/v1/components/non-existent-id', userFixtures.owner.email)
+        .authenticatedRequest(
+          'delete',
+          '/api/v1/components/non-existent-id',
+          userFixtures.owner.email
+        )
         .expect(404);
     });
 
@@ -434,7 +477,11 @@ describe('Component API Integration Tests', () => {
       // This would be tested if we had contract relationships set up
       // For now, just verify the component can be deleted
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/components/${testComponent.id}`, userFixtures.owner.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/components/${testComponent.id}`,
+          userFixtures.owner.email
+        )
         .expect(204);
     });
   });
@@ -444,7 +491,7 @@ describe('Component API Integration Tests', () => {
       const baseComponent = {
         name: 'versioned-component',
         type: 'SERVICE' as const,
-        metadata: {}
+        metadata: {},
       };
 
       // Create multiple versions
@@ -481,7 +528,11 @@ describe('Component API Integration Tests', () => {
       );
 
       const response = await apiHelper
-        .authenticatedRequest('get', `/api/v1/components/${component.name}:2.1.0`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/components/${component.name}:2.1.0`,
+          userFixtures.viewer.email
+        )
         .expect(200);
 
       expect(response.body.version).toBe('2.1.0');
@@ -506,7 +557,11 @@ describe('Component API Integration Tests', () => {
 
     it('should transition from DRAFT to ACTIVE', async () => {
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${draftComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${draftComponent.id}`,
+          userFixtures.developer.email
+        )
         .send({ status: 'ACTIVE' })
         .expect(200);
 
@@ -515,7 +570,11 @@ describe('Component API Integration Tests', () => {
 
     it('should transition from ACTIVE to DEPRECATED', async () => {
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/components/${activeComponent.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/components/${activeComponent.id}`,
+          userFixtures.developer.email
+        )
         .send({ status: 'DEPRECATED' })
         .expect(200);
 
@@ -527,7 +586,7 @@ describe('Component API Integration Tests', () => {
       const transitions = [
         { from: 'DRAFT', to: 'DEPRECATED' },
         { from: 'ACTIVE', to: 'DRAFT' },
-        { from: 'DEPRECATED', to: 'ACTIVE' }
+        { from: 'DEPRECATED', to: 'ACTIVE' },
       ];
 
       for (const transition of transitions) {
@@ -537,7 +596,11 @@ describe('Component API Integration Tests', () => {
         );
 
         await apiHelper
-          .authenticatedRequest('patch', `/api/v1/components/${component.id}`, userFixtures.developer.email)
+          .authenticatedRequest(
+            'patch',
+            `/api/v1/components/${component.id}`,
+            userFixtures.developer.email
+          )
           .send({ status: transition.to })
           .expect(200);
       }
@@ -554,7 +617,7 @@ describe('Component API Integration Tests', () => {
         .expect(500);
 
       expect(response.body.error).toBeDefined();
-      
+
       // Reconnect for cleanup
       await prisma.$connect();
     });
@@ -571,14 +634,14 @@ describe('Component API Integration Tests', () => {
 
     it('should handle large payloads', async () => {
       const largeMetadata = {
-        data: 'x'.repeat(1000000) // 1MB of data
+        data: 'x'.repeat(1000000), // 1MB of data
       };
 
       const response = await apiHelper
         .authenticatedRequest('post', '/api/v1/components', userFixtures.developer.email)
         .send({
           ...createComponentFixture(),
-          metadata: largeMetadata
+          metadata: largeMetadata,
         })
         .expect(400);
 

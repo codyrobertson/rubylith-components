@@ -58,9 +58,9 @@ describe('Authentication Utilities', () => {
       it('should verify correct password', async () => {
         const plainPassword = 'SecurePassword123!';
         const hashedPassword = await PasswordService.hashPassword(plainPassword);
-        
+
         const isValid = await PasswordService.verifyPassword(plainPassword, hashedPassword);
-        
+
         expect(isValid).toBe(true);
       });
 
@@ -68,36 +68,36 @@ describe('Authentication Utilities', () => {
         const plainPassword = 'SecurePassword123!';
         const wrongPassword = 'WrongPassword123!';
         const hashedPassword = await PasswordService.hashPassword(plainPassword);
-        
+
         const isValid = await PasswordService.verifyPassword(wrongPassword, hashedPassword);
-        
+
         expect(isValid).toBe(false);
       });
 
       it('should reject empty password against hash', async () => {
         const plainPassword = 'SecurePassword123!';
         const hashedPassword = await PasswordService.hashPassword(plainPassword);
-        
+
         const isValid = await PasswordService.verifyPassword('', hashedPassword);
-        
+
         expect(isValid).toBe(false);
       });
 
       it('should handle invalid hash format', async () => {
         const plainPassword = 'SecurePassword123!';
         const invalidHash = 'not-a-valid-bcrypt-hash';
-        
+
         const isValid = await PasswordService.verifyPassword(plainPassword, invalidHash);
-        
+
         expect(isValid).toBe(false);
       });
 
       it('should be case sensitive', async () => {
         const plainPassword = 'SecurePassword123!';
         const hashedPassword = await PasswordService.hashPassword(plainPassword);
-        
+
         const isValid = await PasswordService.verifyPassword('securepassword123!', hashedPassword);
-        
+
         expect(isValid).toBe(false);
       });
     });
@@ -153,7 +153,7 @@ describe('Authentication Utilities', () => {
 
         expect(decoded.exp).toBeDefined();
         expect(decoded.iat).toBeDefined();
-        
+
         // Check expiration is approximately 15 minutes
         const expirationTime = decoded.exp - decoded.iat;
         expect(expirationTime).toBe(15 * 60); // 15 minutes in seconds
@@ -199,7 +199,7 @@ describe('Authentication Utilities', () => {
 
         expect(decoded.exp).toBeDefined();
         expect(decoded.iat).toBeDefined();
-        
+
         // Check expiration is approximately 7 days
         const expirationTime = decoded.exp - decoded.iat;
         expect(expirationTime).toBe(7 * 24 * 60 * 60); // 7 days in seconds
@@ -276,7 +276,7 @@ describe('Authentication Utilities', () => {
           undefined,
         ];
 
-        malformedTokens.forEach(token => {
+        malformedTokens.forEach((token) => {
           expect(() => {
             TokenService.verifyToken(token as any);
           }).toThrow();
@@ -309,14 +309,14 @@ describe('Authentication Utilities', () => {
     describe('edge cases', () => {
       it('should handle missing JWT_SECRET', () => {
         delete process.env.JWT_SECRET;
-        // Mock config to also not have JWT_SECRET 
+        // Mock config to also not have JWT_SECRET
         const originalConfig = config.auth.jwtSecret;
         (config as any).auth.jwtSecret = '';
 
         expect(() => {
           TokenService.generateAccessToken(mockUser);
         }).toThrow('JWT_SECRET is not configured');
-        
+
         // Restore config
         (config as any).auth.jwtSecret = originalConfig;
       });
@@ -339,10 +339,10 @@ describe('Authentication Utilities', () => {
 
       it('should handle custom expiration times', () => {
         process.env.JWT_ACCESS_TOKEN_EXPIRES_IN = '1h';
-        
+
         const token = TokenService.generateAccessToken(mockUser);
         const decoded = jwt.decode(token) as any;
-        
+
         const expirationTime = decoded.exp - decoded.iat;
         expect(expirationTime).toBe(60 * 60); // 1 hour in seconds
       });

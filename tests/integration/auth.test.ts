@@ -8,7 +8,13 @@ import request from 'supertest';
 import { apiServer } from '../../src/api/server';
 import { testDb } from '../utils/database';
 import { ApiTestHelper, AuthTestUtils, ValidationTestUtils } from '../utils/helpers';
-import { userFixtures, loginFixtures, registrationFixtures, invalidUserFixtures, UserFixtureFactory } from '../fixtures/users';
+import {
+  userFixtures,
+  loginFixtures,
+  registrationFixtures,
+  invalidUserFixtures,
+  UserFixtureFactory,
+} from '../fixtures/users';
 
 describe('Authentication Endpoints', () => {
   let app: any;
@@ -35,17 +41,14 @@ describe('Authentication Endpoints', () => {
     it('should register a new user with valid data', async () => {
       const userData = registrationFixtures.validUser;
 
-      const response = await request(app)
-        .post(endpoint)
-        .send(userData)
-        .expect(201);
+      const response = await request(app).post(endpoint).send(userData).expect(201);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('user');
       expect(response.body.data).toHaveProperty('tokens');
 
       const { user, tokens } = response.body.data;
-      
+
       ValidationTestUtils.assertUserStructure(user);
       expect(user.email).toBe(userData.email.toLowerCase());
       expect(user.name).toBe(userData.name);
@@ -67,10 +70,7 @@ describe('Authentication Endpoints', () => {
         name: 'Test User',
       };
 
-      const response = await request(app)
-        .post(endpoint)
-        .send(userData)
-        .expect(201);
+      const response = await request(app).post(endpoint).send(userData).expect(201);
 
       expect(response.body.data.user.email).toBe('test@example.com');
     });
@@ -85,7 +85,7 @@ describe('Authentication Endpoints', () => {
 
       for (const testCase of testCases) {
         await testDb.cleanDatabase();
-        
+
         const response = await request(app)
           .post(endpoint)
           .send({
@@ -102,10 +102,7 @@ describe('Authentication Endpoints', () => {
 
     it('should fail with duplicate email', async () => {
       // First registration
-      await request(app)
-        .post(endpoint)
-        .send(registrationFixtures.validUser)
-        .expect(201);
+      await request(app).post(endpoint).send(registrationFixtures.validUser).expect(201);
 
       // Duplicate registration
       const response = await request(app)
@@ -148,10 +145,7 @@ describe('Authentication Endpoints', () => {
       ];
 
       for (const testCase of testCases) {
-        const response = await request(app)
-          .post(endpoint)
-          .send(testCase.payload)
-          .expect(400);
+        const response = await request(app).post(endpoint).send(testCase.payload).expect(400);
 
         ValidationTestUtils.assertErrorResponseStructure(response.body);
         expect(response.body.error.code).toBe('VALIDATION_ERROR');
@@ -160,10 +154,7 @@ describe('Authentication Endpoints', () => {
     });
 
     it('should handle empty request body', async () => {
-      const response = await request(app)
-        .post(endpoint)
-        .send({})
-        .expect(400);
+      const response = await request(app).post(endpoint).send({}).expect(400);
 
       ValidationTestUtils.assertErrorResponseStructure(response.body);
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
@@ -202,17 +193,14 @@ describe('Authentication Endpoints', () => {
     });
 
     it('should login with valid credentials', async () => {
-      const response = await request(app)
-        .post(endpoint)
-        .send(loginFixtures.validOwner)
-        .expect(200);
+      const response = await request(app).post(endpoint).send(loginFixtures.validOwner).expect(200);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('user');
       expect(response.body.data).toHaveProperty('tokens');
 
       const { user, tokens } = response.body.data;
-      
+
       ValidationTestUtils.assertUserStructure(user);
       expect(user.email).toBe(loginFixtures.validOwner.email);
       expect(user.role).toBe('OWNER');
@@ -292,18 +280,15 @@ describe('Authentication Endpoints', () => {
       ];
 
       for (const testCase of testCases) {
-        const response = await request(app)
-          .post(endpoint)
-          .send(testCase.payload)
-          .expect(400);
+        const response = await request(app).post(endpoint).send(testCase.payload).expect(400);
 
         ValidationTestUtils.assertErrorResponseStructure(response.body);
         expect(response.body.error.code).toBe('VALIDATION_ERROR');
-        
+
         if (testCase.missingField) {
           expect(response.body.error.details).toHaveProperty(testCase.missingField);
         } else if (testCase.missingFields) {
-          testCase.missingFields.forEach(field => {
+          testCase.missingFields.forEach((field) => {
             expect(response.body.error.details).toHaveProperty(field);
           });
         }
@@ -324,7 +309,7 @@ describe('Authentication Endpoints', () => {
       const rolesToTest = ['MAINTAINER', 'CONTRIBUTOR', 'CONSUMER', 'AUDITOR'];
 
       for (const role of rolesToTest) {
-        const userFixture = Object.values(userFixtures).find(u => u.role === role);
+        const userFixture = Object.values(userFixtures).find((u) => u.role === role);
         if (userFixture) {
           const response = await request(app)
             .post(endpoint)
@@ -348,12 +333,10 @@ describe('Authentication Endpoints', () => {
     beforeEach(async () => {
       // Create user and get tokens
       await AuthTestUtils.createTestUser(userFixtures.contributor);
-      const loginResponse = await request(app)
-        .post('/api/v1/public/auth/login')
-        .send({
-          email: userFixtures.contributor.email,
-          password: userFixtures.contributor.password,
-        });
+      const loginResponse = await request(app).post('/api/v1/public/auth/login').send({
+        email: userFixtures.contributor.email,
+        password: userFixtures.contributor.password,
+      });
 
       validRefreshToken = loginResponse.body.data.tokens.refreshToken;
       validAccessToken = loginResponse.body.data.tokens.accessToken;
@@ -368,7 +351,7 @@ describe('Authentication Endpoints', () => {
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('accessToken');
       expect(response.body.data).toHaveProperty('expiresIn');
-      
+
       expect(typeof response.body.data.accessToken).toBe('string');
       expect(response.body.data.accessToken).not.toBe(validAccessToken); // Should be new token
       expect(response.body.data.expiresIn).toBe(900); // 15 minutes
@@ -396,10 +379,7 @@ describe('Authentication Endpoints', () => {
     });
 
     it('should fail with missing refresh token', async () => {
-      const response = await request(app)
-        .post(endpoint)
-        .send({})
-        .expect(400);
+      const response = await request(app).post(endpoint).send({}).expect(400);
 
       ValidationTestUtils.assertErrorResponseStructure(response.body);
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
@@ -407,21 +387,14 @@ describe('Authentication Endpoints', () => {
     });
 
     it('should fail with empty refresh token', async () => {
-      const response = await request(app)
-        .post(endpoint)
-        .send({ refreshToken: '' })
-        .expect(400);
+      const response = await request(app).post(endpoint).send({ refreshToken: '' }).expect(400);
 
       ValidationTestUtils.assertErrorResponseStructure(response.body);
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });
 
     it('should fail with malformed refresh token', async () => {
-      const malformedTokens = [
-        'not-a-jwt',
-        'missing.parts',
-        'too.many.parts.here.invalid',
-      ];
+      const malformedTokens = ['not-a-jwt', 'missing.parts', 'too.many.parts.here.invalid'];
 
       for (const token of malformedTokens) {
         const response = await request(app)
@@ -459,9 +432,7 @@ describe('Authentication Endpoints', () => {
     });
 
     it('should fail without authorization header', async () => {
-      const response = await request(app)
-        .post(endpoint)
-        .expect(401);
+      const response = await request(app).post(endpoint).expect(401);
 
       ValidationTestUtils.assertErrorResponseStructure(response.body);
       expect(response.body.error.code).toBe('UNAUTHORIZED');
@@ -486,10 +457,7 @@ describe('Authentication Endpoints', () => {
       ];
 
       for (const header of malformedHeaders) {
-        const response = await request(app)
-          .post(endpoint)
-          .set('Authorization', header)
-          .expect(401);
+        const response = await request(app).post(endpoint).set('Authorization', header).expect(401);
 
         ValidationTestUtils.assertErrorResponseStructure(response.body);
         expect(response.body.error.code).toBe('UNAUTHORIZED');
@@ -546,25 +514,25 @@ describe('Authentication Endpoints', () => {
       await AuthTestUtils.createTestUser(userData);
 
       // Login from multiple "devices" concurrently
-      const loginPromises = Array(5).fill(null).map(() =>
-        request(app)
-          .post('/api/v1/public/auth/login')
-          .send({
+      const loginPromises = Array(5)
+        .fill(null)
+        .map(() =>
+          request(app).post('/api/v1/public/auth/login').send({
             email: userData.email,
             password: userData.password,
           })
-      );
+        );
 
       const responses = await Promise.all(loginPromises);
 
       // All should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(response.body.data.tokens.accessToken).toBeDefined();
       });
 
       // All tokens should be different
-      const tokens = responses.map(r => r.body.data.tokens.accessToken);
+      const tokens = responses.map((r) => r.body.data.tokens.accessToken);
       const uniqueTokens = new Set(tokens);
       expect(uniqueTokens.size).toBe(5);
     });

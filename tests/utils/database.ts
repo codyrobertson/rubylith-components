@@ -19,7 +19,7 @@ export class TestDatabase {
     const random = Math.random().toString(36).substring(7);
     const suiteName = testSuiteName || 'test';
     this.dbPath = path.join(process.cwd(), 'tests', `${suiteName}-${timestamp}-${random}.db`);
-    
+
     // Update the DATABASE_URL to use our test database
     process.env.DATABASE_URL = `file:${this.dbPath}`;
   }
@@ -267,7 +267,8 @@ export class TestDatabase {
             author: 'Test Author',
             keywords: ['button', 'ui', 'test'],
             contractId: contracts[0].id,
-            sourceCode: 'import React from "react"; export const TestButton = () => <button>Test</button>;',
+            sourceCode:
+              'import React from "react"; export const TestButton = () => <button>Test</button>;',
             buildArtifacts: {
               bundle: 'test-bundle.js',
               styles: 'test-styles.css',
@@ -285,7 +286,8 @@ export class TestDatabase {
             author: 'Test Author',
             keywords: ['input', 'form', 'test'],
             contractId: contracts[1].id,
-            sourceCode: 'import React from "react"; export const TestInput = () => <input type="text" />;',
+            sourceCode:
+              'import React from "react"; export const TestInput = () => <input type="text" />;',
             buildArtifacts: {
               bundle: 'test-input-bundle.js',
               styles: 'test-input-styles.css',

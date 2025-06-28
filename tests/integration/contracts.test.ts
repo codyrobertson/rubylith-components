@@ -24,7 +24,7 @@ describe('Contract API Integration Tests', () => {
     testDb = new TestDatabase();
     await testDb.setup();
     prisma = testDb.prisma;
-    
+
     app = createServer(prisma);
     apiHelper = new ApiTestHelper(app);
     componentService = new ComponentService(prisma);
@@ -37,7 +37,7 @@ describe('Contract API Integration Tests', () => {
 
   beforeEach(async () => {
     await testDb.clean();
-    
+
     // Create test users
     await apiHelper.createUser(userFixtures.owner);
     await apiHelper.createUser(userFixtures.developer);
@@ -69,8 +69,8 @@ describe('Contract API Integration Tests', () => {
         schema: contractFixtures.restContract.schema,
         metadata: {
           description: 'User authentication endpoints',
-          tags: ['auth', 'security']
-        }
+          tags: ['auth', 'security'],
+        },
       };
 
       const response = await apiHelper
@@ -84,7 +84,7 @@ describe('Contract API Integration Tests', () => {
         type: contractData.type,
         status: 'DRAFT',
         schema: contractData.schema,
-        metadata: contractData.metadata
+        metadata: contractData.metadata,
       });
       expect(response.body.id).toBeDefined();
       expect(response.body.provider.id).toBe(testComponents.authService.id);
@@ -94,18 +94,15 @@ describe('Contract API Integration Tests', () => {
 
     it('should reject contract creation without authentication', async () => {
       const contractData = createContractFixture({
-        providerId: testComponents.authService.id
+        providerId: testComponents.authService.id,
       });
 
-      await request(app)
-        .post('/api/v1/contracts')
-        .send(contractData)
-        .expect(401);
+      await request(app).post('/api/v1/contracts').send(contractData).expect(401);
     });
 
     it('should reject contract creation with viewer role', async () => {
       const contractData = createContractFixture({
-        providerId: testComponents.authService.id
+        providerId: testComponents.authService.id,
       });
 
       await apiHelper
@@ -122,8 +119,8 @@ describe('Contract API Integration Tests', () => {
         providerId: testComponents.authService.id,
         schema: {
           // Missing required fields for REST contract
-          endpoints: 'not-an-array'
-        }
+          endpoints: 'not-an-array',
+        },
       };
 
       const response = await apiHelper
@@ -139,7 +136,7 @@ describe('Contract API Integration Tests', () => {
       const graphqlContract = {
         ...contractFixtures.graphqlContract,
         providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id]
+        consumerIds: [testComponents.apiGateway.id],
       };
 
       const response = await apiHelper
@@ -157,7 +154,7 @@ describe('Contract API Integration Tests', () => {
       const eventContract = {
         ...contractFixtures.eventContract,
         providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id, testComponents.database.id]
+        consumerIds: [testComponents.apiGateway.id, testComponents.database.id],
       };
 
       const response = await apiHelper
@@ -172,7 +169,7 @@ describe('Contract API Integration Tests', () => {
 
     it('should reject duplicate name:version:provider combination', async () => {
       const contractData = createContractFixture({
-        providerId: testComponents.authService.id
+        providerId: testComponents.authService.id,
       });
 
       // Create first contract
@@ -193,7 +190,7 @@ describe('Contract API Integration Tests', () => {
     it('should validate provider and consumer IDs exist', async () => {
       const contractData = createContractFixture({
         providerId: 'non-existent-id',
-        consumerIds: ['invalid-id-1', 'invalid-id-2']
+        consumerIds: ['invalid-id-1', 'invalid-id-2'],
       });
 
       const response = await apiHelper
@@ -208,29 +205,41 @@ describe('Contract API Integration Tests', () => {
   describe('GET /api/v1/contracts', () => {
     beforeEach(async () => {
       // Create multiple contracts
-      await contractService.create({
-        ...contractFixtures.restContract,
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id]
-      }, userFixtures.developer.id);
+      await contractService.create(
+        {
+          ...contractFixtures.restContract,
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+        },
+        userFixtures.developer.id
+      );
 
-      await contractService.create({
-        ...contractFixtures.graphqlContract,
-        providerId: testComponents.apiGateway.id,
-        consumerIds: [testComponents.database.id]
-      }, userFixtures.developer.id);
+      await contractService.create(
+        {
+          ...contractFixtures.graphqlContract,
+          providerId: testComponents.apiGateway.id,
+          consumerIds: [testComponents.database.id],
+        },
+        userFixtures.developer.id
+      );
 
-      await contractService.create({
-        ...contractFixtures.eventContract,
-        providerId: testComponents.database.id,
-        consumerIds: [testComponents.authService.id, testComponents.apiGateway.id]
-      }, userFixtures.developer.id);
+      await contractService.create(
+        {
+          ...contractFixtures.eventContract,
+          providerId: testComponents.database.id,
+          consumerIds: [testComponents.authService.id, testComponents.apiGateway.id],
+        },
+        userFixtures.developer.id
+      );
 
-      await contractService.create({
-        ...createContractFixture({ type: 'REST', status: 'ACTIVE' }),
-        providerId: testComponents.authService.id,
-        consumerIds: []
-      }, userFixtures.developer.id);
+      await contractService.create(
+        {
+          ...createContractFixture({ type: 'REST', status: 'ACTIVE' }),
+          providerId: testComponents.authService.id,
+          consumerIds: [],
+        },
+        userFixtures.developer.id
+      );
     });
 
     it('should list all contracts with pagination', async () => {
@@ -244,7 +253,7 @@ describe('Contract API Integration Tests', () => {
         page: 1,
         limit: 2,
         total: 4,
-        totalPages: 2
+        totalPages: 2,
       });
     });
 
@@ -324,9 +333,7 @@ describe('Contract API Integration Tests', () => {
     });
 
     it('should work without authentication for public access', async () => {
-      const response = await request(app)
-        .get('/api/v1/contracts')
-        .expect(200);
+      const response = await request(app).get('/api/v1/contracts').expect(200);
 
       expect(response.body.data).toBeDefined();
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -337,16 +344,23 @@ describe('Contract API Integration Tests', () => {
     let testContract: any;
 
     beforeEach(async () => {
-      testContract = await contractService.create({
-        ...contractFixtures.restContract,
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id, testComponents.database.id]
-      }, userFixtures.developer.id);
+      testContract = await contractService.create(
+        {
+          ...contractFixtures.restContract,
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id, testComponents.database.id],
+        },
+        userFixtures.developer.id
+      );
     });
 
     it('should retrieve contract by ID', async () => {
       const response = await apiHelper
-        .authenticatedRequest('get', `/api/v1/contracts/${testContract.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.viewer.email
+        )
         .expect(200);
 
       expect(response.body).toMatchObject({
@@ -354,19 +368,23 @@ describe('Contract API Integration Tests', () => {
         name: testContract.name,
         version: testContract.version,
         type: testContract.type,
-        schema: testContract.schema
+        schema: testContract.schema,
       });
     });
 
     it('should include full provider and consumer details', async () => {
       const response = await apiHelper
-        .authenticatedRequest('get', `/api/v1/contracts/${testContract.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.viewer.email
+        )
         .expect(200);
 
       expect(response.body.provider).toMatchObject({
         id: testComponents.authService.id,
         name: testComponents.authService.name,
-        version: testComponents.authService.version
+        version: testComponents.authService.version,
       });
       expect(response.body.consumers).toHaveLength(2);
     });
@@ -380,9 +398,7 @@ describe('Contract API Integration Tests', () => {
     });
 
     it('should work without authentication for public access', async () => {
-      await request(app)
-        .get(`/api/v1/contracts/${testContract.id}`)
-        .expect(200);
+      await request(app).get(`/api/v1/contracts/${testContract.id}`).expect(200);
     });
   });
 
@@ -391,19 +407,25 @@ describe('Contract API Integration Tests', () => {
     let graphqlContract: any;
 
     beforeEach(async () => {
-      restContract = await contractService.create({
-        ...contractFixtures.restContract,
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id],
-        status: 'ACTIVE'
-      }, userFixtures.developer.id);
+      restContract = await contractService.create(
+        {
+          ...contractFixtures.restContract,
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+          status: 'ACTIVE',
+        },
+        userFixtures.developer.id
+      );
 
-      graphqlContract = await contractService.create({
-        ...contractFixtures.graphqlContract,
-        providerId: testComponents.apiGateway.id,
-        consumerIds: [testComponents.database.id],
-        status: 'ACTIVE'
-      }, userFixtures.developer.id);
+      graphqlContract = await contractService.create(
+        {
+          ...contractFixtures.graphqlContract,
+          providerId: testComponents.apiGateway.id,
+          consumerIds: [testComponents.database.id],
+          status: 'ACTIVE',
+        },
+        userFixtures.developer.id
+      );
     });
 
     it('should validate REST contract implementation', async () => {
@@ -417,10 +439,10 @@ describe('Contract API Integration Tests', () => {
                 type: 'object',
                 properties: {
                   email: { type: 'string', format: 'email' },
-                  password: { type: 'string', minLength: 8 }
+                  password: { type: 'string', minLength: 8 },
                 },
-                required: ['email', 'password']
-              }
+                required: ['email', 'password'],
+              },
             },
             response: {
               '200': {
@@ -432,18 +454,22 @@ describe('Contract API Integration Tests', () => {
                     type: 'object',
                     properties: {
                       id: { type: 'string' },
-                      email: { type: 'string' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        ]
+                      email: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
       };
 
       const response = await apiHelper
-        .authenticatedRequest('post', `/api/v1/contracts/${restContract.id}/validate`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'post',
+          `/api/v1/contracts/${restContract.id}/validate`,
+          userFixtures.developer.email
+        )
         .send({ implementation })
         .expect(200);
 
@@ -459,13 +485,17 @@ describe('Contract API Integration Tests', () => {
             path: '/auth/login',
             method: 'POST',
             request: { body: {} },
-            response: { '200': {} }
-          }
-        ]
+            response: { '200': {} },
+          },
+        ],
       };
 
       const response = await apiHelper
-        .authenticatedRequest('post', `/api/v1/contracts/${restContract.id}/validate`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'post',
+          `/api/v1/contracts/${restContract.id}/validate`,
+          userFixtures.developer.email
+        )
         .send({ implementation: incompleteImplementation })
         .expect(200);
 
@@ -497,11 +527,15 @@ describe('Contract API Integration Tests', () => {
             password: String!
             name: String
           }
-        `
+        `,
       };
 
       const response = await apiHelper
-        .authenticatedRequest('post', `/api/v1/contracts/${graphqlContract.id}/validate`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'post',
+          `/api/v1/contracts/${graphqlContract.id}/validate`,
+          userFixtures.developer.email
+        )
         .send({ implementation })
         .expect(200);
 
@@ -520,11 +554,14 @@ describe('Contract API Integration Tests', () => {
     let testContract: any;
 
     beforeEach(async () => {
-      testContract = await contractService.create({
-        ...contractFixtures.restContract,
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id]
-      }, userFixtures.developer.id);
+      testContract = await contractService.create(
+        {
+          ...contractFixtures.restContract,
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+        },
+        userFixtures.developer.id
+      );
     });
 
     it('should update contract properties', async () => {
@@ -533,13 +570,17 @@ describe('Contract API Integration Tests', () => {
         metadata: {
           ...testContract.metadata,
           updated: true,
-          reviewedBy: userFixtures.developer.email
+          reviewedBy: userFixtures.developer.email,
         },
-        consumerIds: [testComponents.apiGateway.id, testComponents.database.id]
+        consumerIds: [testComponents.apiGateway.id, testComponents.database.id],
       };
 
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${testContract.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.developer.email
+        )
         .send(updates)
         .expect(200);
 
@@ -560,25 +601,29 @@ describe('Contract API Integration Tests', () => {
               headers: {
                 type: 'object',
                 properties: {
-                  Authorization: { type: 'string' }
+                  Authorization: { type: 'string' },
                 },
-                required: ['Authorization']
-              }
+                required: ['Authorization'],
+              },
             },
             response: {
               '200': {
                 type: 'object',
                 properties: {
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        ]
+                  message: { type: 'string' },
+                },
+              },
+            },
+          },
+        ],
       };
 
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${testContract.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.developer.email
+        )
         .send({ schema: updatedSchema })
         .expect(200);
 
@@ -594,18 +639,26 @@ describe('Contract API Integration Tests', () => {
 
     it('should require developer or owner role', async () => {
       await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${testContract.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.viewer.email
+        )
         .send({ status: 'ACTIVE' })
         .expect(403);
     });
 
     it('should validate schema updates', async () => {
       const invalidSchema = {
-        endpoints: 'not-an-array'
+        endpoints: 'not-an-array',
       };
 
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${testContract.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.developer.email
+        )
         .send({ schema: invalidSchema })
         .expect(400);
 
@@ -614,7 +667,11 @@ describe('Contract API Integration Tests', () => {
 
     it('should handle version updates with new name:version:provider validation', async () => {
       const response = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${testContract.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.developer.email
+        )
         .send({ version: '2.0.0' })
         .expect(200);
 
@@ -626,43 +683,64 @@ describe('Contract API Integration Tests', () => {
     let testContract: any;
 
     beforeEach(async () => {
-      testContract = await contractService.create({
-        ...contractFixtures.restContract,
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id]
-      }, userFixtures.developer.id);
+      testContract = await contractService.create(
+        {
+          ...contractFixtures.restContract,
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+        },
+        userFixtures.developer.id
+      );
     });
 
     it('should delete contract with owner role', async () => {
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/contracts/${testContract.id}`, userFixtures.owner.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.owner.email
+        )
         .expect(204);
 
       // Verify deletion
       await apiHelper
-        .authenticatedRequest('get', `/api/v1/contracts/${testContract.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'get',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.viewer.email
+        )
         .expect(404);
     });
 
     it('should require authentication', async () => {
-      await request(app)
-        .delete(`/api/v1/contracts/${testContract.id}`)
-        .expect(401);
+      await request(app).delete(`/api/v1/contracts/${testContract.id}`).expect(401);
     });
 
     it('should require owner role', async () => {
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/contracts/${testContract.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.developer.email
+        )
         .expect(403);
 
       await apiHelper
-        .authenticatedRequest('delete', `/api/v1/contracts/${testContract.id}`, userFixtures.viewer.email)
+        .authenticatedRequest(
+          'delete',
+          `/api/v1/contracts/${testContract.id}`,
+          userFixtures.viewer.email
+        )
         .expect(403);
     });
 
     it('should return 404 for non-existent contract', async () => {
       await apiHelper
-        .authenticatedRequest('delete', '/api/v1/contracts/non-existent-id', userFixtures.owner.email)
+        .authenticatedRequest(
+          'delete',
+          '/api/v1/contracts/non-existent-id',
+          userFixtures.owner.email
+        )
         .expect(404);
     });
   });
@@ -670,69 +748,79 @@ describe('Contract API Integration Tests', () => {
   describe('Contract Versioning and Compatibility', () => {
     it('should check compatibility between contract versions', async () => {
       // Create v1 contract
-      const v1Contract = await contractService.create({
-        name: 'versioned-api',
-        version: '1.0.0',
-        type: 'REST',
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id],
-        schema: {
-          endpoints: [
-            {
-              path: '/users',
-              method: 'GET',
-              response: {
-                '200': {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      name: { type: 'string' }
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      }, userFixtures.developer.id);
+      const v1Contract = await contractService.create(
+        {
+          name: 'versioned-api',
+          version: '1.0.0',
+          type: 'REST',
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+          schema: {
+            endpoints: [
+              {
+                path: '/users',
+                method: 'GET',
+                response: {
+                  '200': {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        userFixtures.developer.id
+      );
 
       // Create v2 contract with breaking changes
-      const v2Contract = await contractService.create({
-        name: 'versioned-api',
-        version: '2.0.0',
-        type: 'REST',
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id],
-        schema: {
-          endpoints: [
-            {
-              path: '/users',
-              method: 'GET',
-              response: {
-                '200': {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' }, // Breaking change: string -> number
-                      fullName: { type: 'string' } // Breaking change: renamed field
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      }, userFixtures.developer.id);
+      const v2Contract = await contractService.create(
+        {
+          name: 'versioned-api',
+          version: '2.0.0',
+          type: 'REST',
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+          schema: {
+            endpoints: [
+              {
+                path: '/users',
+                method: 'GET',
+                response: {
+                  '200': {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'number' }, // Breaking change: string -> number
+                        fullName: { type: 'string' }, // Breaking change: renamed field
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        userFixtures.developer.id
+      );
 
       // Check compatibility
       const response = await apiHelper
-        .authenticatedRequest('post', '/api/v1/contracts/check-compatibility', userFixtures.developer.email)
+        .authenticatedRequest(
+          'post',
+          '/api/v1/contracts/check-compatibility',
+          userFixtures.developer.email
+        )
         .send({
           fromContractId: v1Contract.id,
-          toContractId: v2Contract.id
+          toContractId: v2Contract.id,
         })
         .expect(200);
 
@@ -743,76 +831,86 @@ describe('Contract API Integration Tests', () => {
 
     it('should detect non-breaking changes', async () => {
       // Create v1 contract
-      const v1Contract = await contractService.create({
-        name: 'compatible-api',
-        version: '1.0.0',
-        type: 'REST',
-        providerId: testComponents.authService.id,
-        consumerIds: [],
-        schema: {
-          endpoints: [
-            {
-              path: '/users',
-              method: 'GET',
-              response: {
-                '200': {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    name: { type: 'string' }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      }, userFixtures.developer.id);
+      const v1Contract = await contractService.create(
+        {
+          name: 'compatible-api',
+          version: '1.0.0',
+          type: 'REST',
+          providerId: testComponents.authService.id,
+          consumerIds: [],
+          schema: {
+            endpoints: [
+              {
+                path: '/users',
+                method: 'GET',
+                response: {
+                  '200': {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      name: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        userFixtures.developer.id
+      );
 
       // Create v1.1 contract with non-breaking changes
-      const v11Contract = await contractService.create({
-        name: 'compatible-api',
-        version: '1.1.0',
-        type: 'REST',
-        providerId: testComponents.authService.id,
-        consumerIds: [],
-        schema: {
-          endpoints: [
-            {
-              path: '/users',
-              method: 'GET',
-              response: {
-                '200': {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    name: { type: 'string' },
-                    email: { type: 'string' } // Added optional field
-                  }
-                }
-              }
-            },
-            {
-              path: '/users/:id',
-              method: 'GET', // New endpoint
-              response: {
-                '200': {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    name: { type: 'string' }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      }, userFixtures.developer.id);
+      const v11Contract = await contractService.create(
+        {
+          name: 'compatible-api',
+          version: '1.1.0',
+          type: 'REST',
+          providerId: testComponents.authService.id,
+          consumerIds: [],
+          schema: {
+            endpoints: [
+              {
+                path: '/users',
+                method: 'GET',
+                response: {
+                  '200': {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      name: { type: 'string' },
+                      email: { type: 'string' }, // Added optional field
+                    },
+                  },
+                },
+              },
+              {
+                path: '/users/:id',
+                method: 'GET', // New endpoint
+                response: {
+                  '200': {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      name: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        userFixtures.developer.id
+      );
 
       const response = await apiHelper
-        .authenticatedRequest('post', '/api/v1/contracts/check-compatibility', userFixtures.developer.email)
+        .authenticatedRequest(
+          'post',
+          '/api/v1/contracts/check-compatibility',
+          userFixtures.developer.email
+        )
         .send({
           fromContractId: v1Contract.id,
-          toContractId: v11Contract.id
+          toContractId: v11Contract.id,
         })
         .expect(200);
 
@@ -832,7 +930,7 @@ describe('Contract API Integration Tests', () => {
           type: 'REST',
           providerId: testComponents.authService.id,
           consumerIds: [],
-          schema: contractFixtures.restContract.schema
+          schema: contractFixtures.restContract.schema,
         })
         .expect(201);
 
@@ -840,15 +938,23 @@ describe('Contract API Integration Tests', () => {
 
       // 2. Add consumers
       await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${draftContract.body.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${draftContract.body.id}`,
+          userFixtures.developer.email
+        )
         .send({
-          consumerIds: [testComponents.apiGateway.id]
+          consumerIds: [testComponents.apiGateway.id],
         })
         .expect(200);
 
       // 3. Activate contract
       const activeContract = await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${draftContract.body.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${draftContract.body.id}`,
+          userFixtures.developer.email
+        )
         .send({ status: 'ACTIVE' })
         .expect(200);
 
@@ -870,16 +976,20 @@ describe('Contract API Integration Tests', () => {
               {
                 path: '/auth/verify',
                 method: 'GET',
-                response: { '200': { type: 'object' } }
-              }
-            ]
-          }
+                response: { '200': { type: 'object' } },
+              },
+            ],
+          },
         })
         .expect(201);
 
       // 5. Deprecate old version
       await apiHelper
-        .authenticatedRequest('patch', `/api/v1/contracts/${draftContract.body.id}`, userFixtures.developer.email)
+        .authenticatedRequest(
+          'patch',
+          `/api/v1/contracts/${draftContract.body.id}`,
+          userFixtures.developer.email
+        )
         .send({ status: 'DEPRECATED' })
         .expect(200);
 
@@ -896,18 +1006,21 @@ describe('Contract API Integration Tests', () => {
   describe('Error Handling', () => {
     it('should handle circular consumer dependencies gracefully', async () => {
       // Component A provides to B, B provides to A
-      const contractA = await contractService.create({
-        ...createContractFixture(),
-        providerId: testComponents.authService.id,
-        consumerIds: [testComponents.apiGateway.id]
-      }, userFixtures.developer.id);
+      const contractA = await contractService.create(
+        {
+          ...createContractFixture(),
+          providerId: testComponents.authService.id,
+          consumerIds: [testComponents.apiGateway.id],
+        },
+        userFixtures.developer.id
+      );
 
       const contractB = await apiHelper
         .authenticatedRequest('post', '/api/v1/contracts', userFixtures.developer.email)
         .send({
           ...createContractFixture(),
           providerId: testComponents.apiGateway.id,
-          consumerIds: [testComponents.authService.id]
+          consumerIds: [testComponents.authService.id],
         })
         .expect(201);
 
@@ -926,9 +1039,9 @@ describe('Contract API Integration Tests', () => {
               properties: {
                 param1: { type: 'string' },
                 param2: { type: 'number' },
-                param3: { type: 'boolean' }
-              }
-            }
+                param3: { type: 'boolean' },
+              },
+            },
           },
           response: {
             '200': {
@@ -940,14 +1053,14 @@ describe('Contract API Integration Tests', () => {
                     type: 'object',
                     properties: {
                       id: { type: 'string' },
-                      value: { type: 'string' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }))
+                      value: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })),
       };
 
       const response = await apiHelper
@@ -957,7 +1070,7 @@ describe('Contract API Integration Tests', () => {
           version: '1.0.0',
           type: 'REST',
           providerId: testComponents.authService.id,
-          schema: largeSchema
+          schema: largeSchema,
         })
         .expect(201);
 
@@ -972,7 +1085,7 @@ describe('Contract API Integration Tests', () => {
           version: '1.0.0',
           type: 'GRAPHQL', // Type says GraphQL
           providerId: testComponents.authService.id,
-          schema: contractFixtures.restContract.schema // But schema is REST
+          schema: contractFixtures.restContract.schema, // But schema is REST
         })
         .expect(400);
 

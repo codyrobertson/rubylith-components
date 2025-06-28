@@ -19,7 +19,12 @@ export class AppError extends Error implements ApiError {
   public readonly details?: unknown;
   public readonly isOperational: boolean = true;
 
-  constructor(message: string, statusCode: number = 500, code: string = 'ERROR', details?: unknown) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    code: string = 'ERROR',
+    details?: unknown
+  ) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
@@ -107,24 +112,19 @@ export const errorHandler = (
 
 // Common error generators
 export const errors = {
-  badRequest: (message: string, details?: unknown) => 
+  badRequest: (message: string, details?: unknown) =>
     new AppError(message, 400, 'BAD_REQUEST', details),
-  
-  unauthorized: (message = 'Unauthorized') => 
-    new AppError(message, 401, 'UNAUTHORIZED'),
-  
-  forbidden: (message = 'Forbidden') => 
-    new AppError(message, 403, 'FORBIDDEN'),
-  
-  notFound: (message = 'Not found') => 
-    new AppError(message, 404, 'NOT_FOUND'),
-  
-  conflict: (message = 'Conflict') => 
-    new AppError(message, 409, 'CONFLICT'),
-  
-  validation: (message = 'Validation error', details?: unknown) => 
+
+  unauthorized: (message = 'Unauthorized') => new AppError(message, 401, 'UNAUTHORIZED'),
+
+  forbidden: (message = 'Forbidden') => new AppError(message, 403, 'FORBIDDEN'),
+
+  notFound: (message = 'Not found') => new AppError(message, 404, 'NOT_FOUND'),
+
+  conflict: (message = 'Conflict') => new AppError(message, 409, 'CONFLICT'),
+
+  validation: (message = 'Validation error', details?: unknown) =>
     new AppError(message, 400, 'VALIDATION_ERROR', details),
-  
-  internal: (message = 'Internal server error') => 
-    new AppError(message, 500, 'INTERNAL_ERROR'),
+
+  internal: (message = 'Internal server error') => new AppError(message, 500, 'INTERNAL_ERROR'),
 };
