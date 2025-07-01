@@ -155,7 +155,9 @@ export class AuthTestUtils {
     role?: string;
     status?: string;
   }, testDatabase?: any) {
-    const hashedPassword = await AuthTestUtils.hashTestPassword(userData.password || 'password123');
+    // Provide default password if not specified
+    const password = userData.password || 'password123';
+    const hashedPassword = await AuthTestUtils.hashTestPassword(password);
     
     const db = testDatabase || testDb;
     return db.createUser({
@@ -179,7 +181,9 @@ export class AuthTestUtils {
     role?: string;
     status?: string;
   }) {
-    const hashedPassword = await AuthTestUtils.hashTestPassword(userData.password || 'password123');
+    // Provide default password if not specified
+    const password = userData.password || 'password123';
+    const hashedPassword = await AuthTestUtils.hashTestPassword(password);
     
     const user = await testDb.createUser({
       email: userData.email,
