@@ -409,7 +409,8 @@ export const environmentCreateFixtures: Record<string, EnvironmentCreateFixture>
 export const environmentUpdateFixtures: Record<string, EnvironmentUpdateFixture> = {
   validUpdate: {
     description: 'Updated environment description',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
+    health: 'HEALTHY',
   },
 
   statusUpdate: {
@@ -436,7 +437,8 @@ export const environmentUpdateFixtures: Record<string, EnvironmentUpdateFixture>
     description: 'Completely updated environment',
     provider: 'azure',
     region: 'westus2',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
+    health: 'HEALTHY',
     deploymentTarget: 'staging',
     resourcesMemoryLimit: 12288,
     metadata: {

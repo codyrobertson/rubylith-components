@@ -36,7 +36,8 @@ describe('Environment Endpoints', () => {
 
   beforeEach(async () => {
     await cleanTestDatabase();
-    apiHelper.clearTokens();
+    // Recreate test users and setup authentication tokens after cleaning database
+    await apiHelper.setupTestUsers(testDb, userFixtures);
   });
 
   describe('POST /api/v1/environments', () => {
@@ -171,7 +172,7 @@ describe('Environment Endpoints', () => {
         { ...environmentFixtures.production, createdById: userFixtures.owner.id },
         { ...environmentFixtures.staging, createdById: userFixtures.maintainer.id },
         { ...environmentFixtures.development, createdById: userFixtures.contributor.id },
-        { ...createEnvironmentFixture({ status: 'DEGRADED' }), createdById: userFixtures.owner.id },
+        { ...createEnvironmentFixture({ status: 'ACTIVE', health: 'DEGRADED' }), createdById: userFixtures.owner.id },
         {
           ...createEnvironmentFixture({ status: 'MAINTENANCE' }),
           createdById: userFixtures.maintainer.id,
@@ -196,19 +197,19 @@ describe('Environment Endpoints', () => {
     });
 
     it('should filter environments by status', async () => {
-      const response = await request(app).get(endpoint).query({ status: 'HEALTHY' }).expect(200);
+      const response = await request(app).get(endpoint).query({ status: 'ACTIVE' }).expect(200);
 
       expect(response.body.data.length).toBeGreaterThan(0);
       response.body.data.forEach((env: any) => {
-        expect(env.status).toBe('HEALTHY');
+        expect(env.status).toBe('ACTIVE');
       });
     });
 
     it('should filter environments by provider', async () => {
-      const response = await request(app).get(endpoint).query({ provider: 'AWS' }).expect(200);
+      const response = await request(app).get(endpoint).query({ provider: 'aws' }).expect(200);
 
       response.body.data.forEach((env: any) => {
-        expect(env.provider).toBe('AWS');
+        expect(env.provider).toBe('aws');
       });
     });
 
@@ -330,7 +331,8 @@ describe('Environment Endpoints', () => {
 
     it('should update environment properties', async () => {
       const updates = {
-        status: 'DEGRADED',
+        status: 'ACTIVE',
+        health: 'DEGRADED',
         deploymentConfig: {
           ...testEnvironment.deploymentConfig,
           replicas: 1,
@@ -356,7 +358,8 @@ describe('Environment Endpoints', () => {
         .send(updates)
         .expect(200);
 
-      expect(response.body.data.status).toBe('DEGRADED');
+      expect(response.body.data.status).toBe('ACTIVE');
+      expect(response.body.data.health).toBe('DEGRADED');
       expect(response.body.data.deploymentConfig.healthCheck).toEqual(
         updates.deploymentConfig.healthCheck
       );
@@ -367,7 +370,7 @@ describe('Environment Endpoints', () => {
     it('should require authentication', async () => {
       await request(app)
         .patch(`/api/v1/environments/${testEnvironment.id}`)
-        .send({ status: 'HEALTHY' })
+        .send({ status: 'ACTIVE' })
         .expect(401);
     });
 
@@ -378,7 +381,7 @@ describe('Environment Endpoints', () => {
           `/api/v1/environments/${testEnvironment.id}`,
           userFixtures.consumer
         )
-        .send({ status: 'HEALTHY' })
+        .send({ status: 'ACTIVE' })
         .expect(403);
 
       expect(response.body.error).toContain('Insufficient permissions');
@@ -442,7 +445,8 @@ describe('Environment Endpoints', () => {
 
     it('should update health status', async () => {
       const healthUpdate = {
-        status: 'UNHEALTHY',
+        status: 'ERROR',
+        health: 'UNHEALTHY',
         metadata: {
           ...testEnvironment.metadata,
           healthMetrics: {
@@ -468,7 +472,8 @@ describe('Environment Endpoints', () => {
         .send(healthUpdate)
         .expect(200);
 
-      expect(response.body.data.status).toBe('UNHEALTHY');
+      expect(response.body.data.status).toBe('ERROR');
+      expect(response.body.data.health).toBe('UNHEALTHY');
       expect(response.body.data.metadata.healthMetrics).toEqual(
         healthUpdate.metadata.healthMetrics
       );
@@ -556,12 +561,14 @@ describe('Environment Endpoints', () => {
       healthyEnv = await testDb.createEnvironment({
         ...environmentFixtures.production,
         health: EnvironmentHealth.HEALTHY,
+        createdById: userFixtures.owner.id,
       });
 
       unhealthyEnv = await testDb.createEnvironment({
         ...createEnvironmentFixture({
           name: 'unhealthy-env',
-          status: 'UNHEALTHY',
+          status: 'ERROR',
+          health: 'UNHEALTHY',
           metadata: {
             healthMetrics: {
               cpu: 98,
@@ -635,7 +642,7 @@ describe('Environment Endpoints', () => {
         .send(degradedMetrics)
         .expect(200);
 
-      expect(response.body.data.status).toBe('DEGRADED');
+      expect(response.body.data.health).toBe('DEGRADED');
     });
 
     it('should automatically set status to UNHEALTHY based on metrics', async () => {
@@ -660,7 +667,7 @@ describe('Environment Endpoints', () => {
         .send(unhealthyMetrics)
         .expect(200);
 
-      expect(response.body.data.status).toBe('UNHEALTHY');
+      expect(response.body.data.health).toBe('UNHEALTHY');
     });
   });
 
@@ -670,6 +677,7 @@ describe('Environment Endpoints', () => {
     beforeEach(async () => {
       testEnvironment = await testDb.createEnvironment({
         ...environmentFixtures.production,
+        createdById: userFixtures.owner.id,
         // capabilities: ['auto-scaling', 'load-balancing', 'ssl-termination'], // TODO: Fix relational syntax
       });
     });
@@ -743,10 +751,11 @@ describe('Environment Endpoints', () => {
       testEnvironment = await testDb.createEnvironment({
         ...environmentFixtures.staging,
         health: EnvironmentHealth.HEALTHY,
+        createdById: userFixtures.owner.id,
       });
     });
 
-    it('should transition from HEALTHY to MAINTENANCE', async () => {
+    it('should transition from ACTIVE to MAINTENANCE', async () => {
       const response = await apiHelper
         .authenticatedRequest(
           'patch',
@@ -771,8 +780,8 @@ describe('Environment Endpoints', () => {
     });
 
     it('should track status history', async () => {
-      // Update status multiple times
-      const statusChanges = ['DEGRADED', 'UNHEALTHY', 'MAINTENANCE', 'HEALTHY'];
+      // Update status multiple times - using valid EnvironmentStatus values
+      const statusChanges = ['ACTIVE', 'INACTIVE', 'MAINTENANCE', 'ERROR'];
 
       for (const status of statusChanges) {
         await apiHelper
@@ -790,7 +799,7 @@ describe('Environment Endpoints', () => {
         .expect(200);
 
       expect(response.body.data.length).toBeGreaterThanOrEqual(statusChanges.length);
-      expect(response.body.data[0].status).toBe('HEALTHY');
+      expect(response.body.data[0].status).toBe('ERROR'); // Last status set
     });
   });
 

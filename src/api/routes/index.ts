@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import { componentRoutes } from './components';
 import { contractRoutes } from './contracts';
-import { environmentRoutes } from './environments';
+import { publicEnvironmentRoutes, protectedEnvironmentRoutes } from './environments';
 import { authRoutes } from './auth';
 import { profileRoutes } from './profiles';
 import { healthRoutes } from './health';
@@ -22,11 +22,12 @@ const adminRouter = Router();
 // Public routes (no authentication required)
 publicRouter.use('/auth', authRoutes);
 publicRouter.use('/health', healthRoutes);
+publicRouter.use('/environments', publicEnvironmentRoutes);
 
 // Protected routes (authentication required)
 protectedRouter.use('/components', componentRoutes);
 protectedRouter.use('/contracts', contractRoutes);
-protectedRouter.use('/environments', environmentRoutes);
+protectedRouter.use('/environments', protectedEnvironmentRoutes);
 protectedRouter.use('/profiles', profileRoutes);
 
 // Admin routes (admin role required)

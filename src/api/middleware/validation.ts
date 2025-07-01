@@ -55,13 +55,13 @@ export const validateRequest = (schema: ValidationSchema | AnyZodObject) => {
       }
 
       if (validationSchema.query) {
-        const validated = await validationSchema.query.parseAsync(req.query);
-        req.query = validated;
+        // Validate query but don't reassign (query is read-only)
+        await validationSchema.query.parseAsync(req.query);
       }
 
       if (validationSchema.params) {
-        const validated = await validationSchema.params.parseAsync(req.params);
-        req.params = validated;
+        // Validate params but don't reassign (params is read-only) 
+        await validationSchema.params.parseAsync(req.params);
       }
 
       next();

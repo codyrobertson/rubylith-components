@@ -157,7 +157,8 @@ export class TokenService {
 
   static verifyAccessToken(token: string): TokenPayload {
     try {
-      return jwt.verify(token, config.auth.jwtSecret, {
+      const jwtSecret = process.env['JWT_SECRET'] || config.auth.jwtSecret;
+      return jwt.verify(token, jwtSecret, {
         issuer: config.auth.jwtIssuer,
         audience: config.auth.jwtAudience,
       }) as TokenPayload;
@@ -168,7 +169,8 @@ export class TokenService {
 
   static verifyRefreshToken(token: string): TokenPayload {
     try {
-      return jwt.verify(token, config.auth.jwtRefreshSecret, {
+      const jwtRefreshSecret = process.env['JWT_REFRESH_SECRET'] || config.auth.jwtRefreshSecret;
+      return jwt.verify(token, jwtRefreshSecret, {
         issuer: config.auth.jwtIssuer,
         audience: config.auth.jwtAudience,
       }) as TokenPayload;

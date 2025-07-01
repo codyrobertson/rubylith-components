@@ -46,7 +46,20 @@ export class ApiServer {
     );
 
     // Body parsing
-    this.app.use(express.json({ limit: config.server.bodyLimit }));
+    this.app.use(express.json({ 
+      limit: config.server.bodyLimit,
+      // Add error handling for malformed JSON
+      verify: (req: any, res, buf) => {
+        try {
+          JSON.parse(buf.toString());
+        } catch (e) {
+          const error = new Error('Invalid JSON');
+          (error as any).statusCode = 400;
+          (error as any).code = 'MALFORMED_JSON';
+          throw error;
+        }
+      }
+    }));
     this.app.use(express.urlencoded({ extended: true, limit: config.server.bodyLimit }));
 
     // Compression
@@ -100,13 +113,9 @@ export class ApiServer {
   }
 
   private setupRoutes(): void {
-    // Public routes (no auth required)
-    this.app.use('/api/v1/public', apiRouter.public);
-
-    // Protected routes (auth required)
+    // Mount API routes
+    this.app.use('/api/v1', apiRouter.public);
     this.app.use('/api/v1', authMiddleware, apiRouter.protected);
-
-    // Admin routes (admin auth required)
     this.app.use('/api/v1/admin', authMiddleware, apiRouter.admin);
   }
 
