@@ -1,424 +1,309 @@
-/**
- * Database utilities for testing
- * Handles test database setup, teardown, and data management
- */
-
 import { PrismaClient } from '../../generated/prisma';
 import { execSync } from 'child_process';
-import fs from 'fs/promises';
 import path from 'path';
+import fs from 'fs';
+import { setupTestDatabase } from '../setup/setupTestDb';
 
 export class TestDatabase {
+  private static instance: TestDatabase;
+  private static instanceCount = 0;
   private client: PrismaClient | null = null;
   private dbPath: string;
+  private dbUrl: string;
+  private isConnected: boolean = false;
   private isSetup: boolean = false;
 
-  constructor(testSuiteName?: string) {
-    // Generate unique database path for each test suite
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(7);
-    const suiteName = testSuiteName || 'test';
-    this.dbPath = path.join(process.cwd(), 'tests', `${suiteName}-${timestamp}-${random}.db`);
-
-    // Update the DATABASE_URL to use our test database
-    process.env.DATABASE_URL = `file:${this.dbPath}`;
-  }
-
-  /**
-   * Initialize test database
-   */
-  async setup(): Promise<void> {
-    if (this.isSetup) {
-      return;
+  private constructor() {
+    // Ensure test directory exists
+    const testDir = path.join(process.cwd(), 'tests', 'db');
+    if (!fs.existsSync(testDir)) {
+      fs.mkdirSync(testDir, { recursive: true });
     }
 
+    // Create unique database file for this test run
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(7);
+    this.dbPath = path.join(testDir, `test-${timestamp}-${random}.db`);
+    this.dbUrl = `file:${this.dbPath}`;
+  }
+
+  static getInstance(): TestDatabase {
+    if (!TestDatabase.instance) {
+      TestDatabase.instance = new TestDatabase();
+      TestDatabase.instanceCount++;
+      console.log(`Creating TestDatabase instance #${TestDatabase.instanceCount}`);
+    }
+    return TestDatabase.instance;
+  }
+
+  async setup(): Promise<void> {
+    if (this.isSetup) {
+      console.log('TestDatabase already setup, skipping...');
+      return;
+    }
+    
     try {
-      // Ensure tests directory exists
-      await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
+      // Setup the test database schema
+      setupTestDatabase(this.dbUrl);
 
-      // Run database migrations
-      execSync('npx prisma db push --force-reset', {
-        stdio: 'pipe',
-        env: { ...process.env, DATABASE_URL: `file:${this.dbPath}` },
-      });
-
-      // Create Prisma client
+      // Create new Prisma client with explicit datasource
       this.client = new PrismaClient({
         datasources: {
           db: {
-            url: `file:${this.dbPath}`,
-          },
+            url: this.dbUrl
+          }
         },
-        log: process.env.NODE_ENV === 'test' ? [] : ['query', 'error', 'warn'],
+        log: ['error', 'warn'] // Reduce logging to prevent stack overflow
       });
 
+      // Connect to database
       await this.client.$connect();
+      this.isConnected = true;
       this.isSetup = true;
-      console.log(`Test database initialized: ${this.dbPath}`);
-    } catch (error) {
-      console.error('Failed to setup test database:', error);
-      throw error;
+
+      // Clear all data for a fresh start
+      console.log('Initial clear of test database...');
+      await this.clearAllData();
+    } catch (error: any) {
+      console.error('Database setup failed:', error);
+      throw new Error(`Failed to setup test database: ${error.message}`);
     }
   }
 
-  /**
-   * Get Prisma client instance
-   */
+  async clearAllData(): Promise<void> {
+    if (!this.client || !this.isConnected) {
+      throw new Error('Database not connected');
+    }
+
+    try {
+      // Get list of tables that actually exist
+      const tables = await this.client.$queryRaw<Array<{ name: string }>>`
+        SELECT name FROM sqlite_master 
+        WHERE type='table' 
+        AND name NOT LIKE 'sqlite_%' 
+        AND name NOT LIKE '_prisma_%'
+      `;
+      
+      const tableNames = tables.map(t => t.name);
+      console.log('Tables found in database:', tableNames);
+
+      // Clear tables in order, only if they exist
+      const clearOperations = [];
+      
+      if (tableNames.includes('MountPlan')) {
+        clearOperations.push(this.client.mountPlan.deleteMany());
+      }
+      if (tableNames.includes('ComponentRequires')) {
+        clearOperations.push(this.client.componentRequires.deleteMany());
+      }
+      if (tableNames.includes('ComponentProvides')) {
+        clearOperations.push(this.client.componentProvides.deleteMany());
+      }
+      if (tableNames.includes('ComponentDependency')) {
+        clearOperations.push(this.client.componentDependency.deleteMany());
+      }
+      if (tableNames.includes('Contract')) {
+        clearOperations.push(this.client.contract.deleteMany());
+      }
+      if (tableNames.includes('Capability')) {
+        clearOperations.push(this.client.capability.deleteMany());
+      }
+      if (tableNames.includes('Environment')) {
+        clearOperations.push(this.client.environment.deleteMany());
+      }
+      if (tableNames.includes('Component')) {
+        clearOperations.push(this.client.component.deleteMany());
+      }
+      if (tableNames.includes('Profile')) {
+        clearOperations.push(this.client.profile.deleteMany());
+      }
+      if (tableNames.includes('User')) {
+        clearOperations.push(this.client.user.deleteMany());
+      }
+
+      if (clearOperations.length > 0) {
+        await this.client.$transaction(clearOperations);
+      }
+    } catch (error) {
+      console.warn('Failed to clear all data:', error);
+      // Try to clear tables individually
+      const tables = ['User', 'Component', 'Environment', 'Contract', 'Profile'];
+      for (const table of tables) {
+        try {
+          await this.client[table.toLowerCase()].deleteMany();
+        } catch (e) {
+          // Ignore errors for non-existent tables
+        }
+      }
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.client && this.isConnected) {
+      await this.client.$disconnect();
+      this.isConnected = false;
+    }
+  }
+
+  async teardown(): Promise<void> {
+    await this.disconnect();
+    
+    // Remove database file
+    if (fs.existsSync(this.dbPath)) {
+      try {
+        fs.unlinkSync(this.dbPath);
+      } catch (error: any) {
+        console.warn(`Failed to delete test database: ${error.message}`);
+      }
+    }
+    
+    this.client = null;
+  }
+
+  async clean(): Promise<void> {
+    await this.clearAllData();
+  }
+
+  async cleanDatabase(): Promise<void> {
+    await this.clearAllData();
+  }
+
   getClient(): PrismaClient {
-    if (!this.client) {
+    if (!this.client || !this.isConnected) {
       throw new Error('Test database not initialized. Call setup() first.');
     }
     return this.client;
   }
 
-  /**
-   * Get Prisma client instance (alias for compatibility)
-   */
   get prisma(): PrismaClient {
     return this.getClient();
   }
 
-  /**
-   * Clean all data from database
-   */
-  async cleanDatabase(): Promise<void> {
-    if (!this.client) return;
-
-    try {
-      // Delete all records in reverse dependency order
-      await this.client.component.deleteMany();
-      await this.client.contract.deleteMany();
-      await this.client.capability.deleteMany();
-      await this.client.mountPlan.deleteMany();
-      await this.client.profile.deleteMany();
-      await this.client.environment.deleteMany();
-      await this.client.user.deleteMany();
-    } catch (error) {
-      console.error('Failed to clean database:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Seed database with basic test data
-   */
-  async seedDatabase(): Promise<{
-    users: any[];
-    contracts: any[];
-    environments: any[];
-    components: any[];
-  }> {
-    if (!this.client) {
-      throw new Error('Test database not initialized');
-    }
-
-    try {
-      // Create test users
-      const users = await Promise.all([
-        this.client.user.create({
-          data: {
-            email: 'owner@test.com',
-            password: '$2b$10$test.hash.for.owner',
-            firstName: 'Test',
-            lastName: 'Owner',
-            role: 'OWNER',
-            isActive: true,
-          },
-        }),
-        this.client.user.create({
-          data: {
-            email: 'maintainer@test.com',
-            password: '$2b$10$test.hash.for.maintainer',
-            firstName: 'Test',
-            lastName: 'Maintainer',
-            role: 'MAINTAINER',
-            isActive: true,
-          },
-        }),
-        this.client.user.create({
-          data: {
-            email: 'contributor@test.com',
-            password: '$2b$10$test.hash.for.contributor',
-            firstName: 'Test',
-            lastName: 'Contributor',
-            role: 'CONTRIBUTOR',
-            isActive: true,
-          },
-        }),
-      ]);
-
-      // Create test contracts
-      const contracts = await Promise.all([
-        this.client.contract.create({
-          data: {
-            name: 'TestButton',
-            version: '1.0.0',
-            schemaVersion: '1.0.0',
-            description: 'Test button contract',
-            author: 'Test Author',
-            keywords: ['button', 'ui', 'test'],
-            schemaProps: { onClick: { type: 'function' } },
-            schemaEvents: { click: { type: 'event' } },
-            schemaMethods: { focus: { type: 'method' } },
-            validationRequired: ['onClick'],
-            validationOptional: ['disabled'],
-            validationRules: {},
-            themeTokens: [],
-            themeVariants: [],
-            themeNamespace: 'button',
-            layoutType: 'flex',
-            styleEngineType: 'css-in-js',
-            styleEngineConfig: {},
-            runtimeFramework: 'react',
-            runtimeVersion: '18.0.0',
-            runtimePolyfills: [],
-            runtimeBrowserSupport: {},
-            compatibilityMinSchemaVersion: '1.0.0',
-            compatibilityBreakingChanges: [],
-            metadata: {},
-          },
-        }),
-        this.client.contract.create({
-          data: {
-            name: 'TestInput',
-            version: '1.0.0',
-            schemaVersion: '1.0.0',
-            description: 'Test input contract',
-            author: 'Test Author',
-            keywords: ['input', 'form', 'test'],
-            schemaProps: { value: { type: 'string' }, onChange: { type: 'function' } },
-            schemaEvents: { change: { type: 'event' } },
-            schemaMethods: { focus: { type: 'method' } },
-            validationRequired: ['onChange'],
-            validationOptional: ['placeholder'],
-            validationRules: {},
-            themeTokens: [],
-            themeVariants: [],
-            themeNamespace: 'input',
-            layoutType: 'block',
-            styleEngineType: 'css-in-js',
-            styleEngineConfig: {},
-            runtimeFramework: 'react',
-            runtimeVersion: '18.0.0',
-            runtimePolyfills: [],
-            runtimeBrowserSupport: {},
-            compatibilityMinSchemaVersion: '1.0.0',
-            compatibilityBreakingChanges: [],
-            metadata: {},
-          },
-        }),
-      ]);
-
-      // Create test environments
-      const environments = await Promise.all([
-        this.client.environment.create({
-          data: {
-            name: 'TestProduction',
-            version: '1.0.0',
-            description: 'Test production environment',
-            provider: 'aws',
-            region: 'us-east-1',
-            status: 'HEALTHY',
-            health: 'HEALTHY',
-            deploymentTarget: 'production',
-            deploymentConfig: {
-              strategy: 'rolling',
-              autoScale: true,
-              minInstances: 2,
-              maxInstances: 10,
-            },
-            resourcesMemoryLimit: 8192,
-            resourcesCpuLimit: '4 cores',
-            resourcesStorageLimit: 100,
-            metadata: {},
-          },
-        }),
-        this.client.environment.create({
-          data: {
-            name: 'TestStaging',
-            version: '1.0.0',
-            description: 'Test staging environment',
-            provider: 'aws',
-            region: 'us-west-2',
-            status: 'HEALTHY',
-            health: 'HEALTHY',
-            deploymentTarget: 'staging',
-            deploymentConfig: {
-              strategy: 'blue-green',
-              autoScale: false,
-              minInstances: 1,
-              maxInstances: 3,
-            },
-            resourcesMemoryLimit: 4096,
-            resourcesCpuLimit: '2 cores',
-            resourcesStorageLimit: 50,
-            metadata: {},
-          },
-        }),
-      ]);
-
-      // Create test components
-      const components = await Promise.all([
-        this.client.component.create({
-          data: {
-            name: 'TestButton',
-            version: '1.0.0',
-            description: 'Test button component implementation',
-            author: 'Test Author',
-            keywords: ['button', 'ui', 'test'],
-            contractId: contracts[0].id,
-            sourceCode:
-              'import React from "react"; export const TestButton = () => <button>Test</button>;',
-            buildArtifacts: {
-              bundle: 'test-bundle.js',
-              styles: 'test-styles.css',
-            },
-            type: 'COMPONENT',
-            lifecycle: 'STABLE',
-            metadata: {},
-          },
-        }),
-        this.client.component.create({
-          data: {
-            name: 'TestInput',
-            version: '1.0.0',
-            description: 'Test input component implementation',
-            author: 'Test Author',
-            keywords: ['input', 'form', 'test'],
-            contractId: contracts[1].id,
-            sourceCode:
-              'import React from "react"; export const TestInput = () => <input type="text" />;',
-            buildArtifacts: {
-              bundle: 'test-input-bundle.js',
-              styles: 'test-input-styles.css',
-            },
-            type: 'COMPONENT',
-            lifecycle: 'STABLE',
-            metadata: {},
-          },
-        }),
-      ]);
-
-      return { users, contracts, environments, components };
-    } catch (error) {
-      console.error('Failed to seed database:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Teardown test database
-   */
-  async teardown(): Promise<void> {
-    try {
-      if (this.client) {
-        await this.client.$disconnect();
-        this.client = null;
-      }
-
-      // Remove test database file
-      try {
-        await fs.unlink(this.dbPath);
-        console.log(`Test database removed: ${this.dbPath}`);
-      } catch (error) {
-        // Ignore if file doesn't exist
-      }
-    } catch (error) {
-      console.error('Failed to teardown test database:', error);
-    }
-  }
-
-  /**
-   * Reset database to clean state
-   */
-  async reset(): Promise<void> {
-    await this.cleanDatabase();
-  }
-
-  /**
-   * Execute in transaction
-   */
-  async transaction<T>(callback: (tx: any) => Promise<T>): Promise<T> {
-    if (!this.client) {
-      throw new Error('Test database not initialized');
-    }
-    return this.client.$transaction(callback);
-  }
-
-  /**
-   * Clean database (alias)
-   */
-  async clean(): Promise<void> {
-    return this.cleanDatabase();
-  }
-
-  /**
-   * Connect to database
-   */
-  async connect(): Promise<void> {
-    if (!this.client) {
-      await this.setup();
-    }
-  }
-
-  /**
-   * Disconnect from database
-   */
-  async disconnect(): Promise<void> {
-    if (this.client) {
-      await this.client.$disconnect();
-    }
-  }
-
-  /**
-   * Create user helper
-   */
+  // Helper methods for creating test data
   async createUser(data: any): Promise<any> {
     const client = this.getClient();
-    return client.user.create({ data });
+    
+    // Remove isActive if present, use status instead
+    const { isActive, ...cleanData } = data;
+    if (isActive !== undefined && !cleanData.status) {
+      cleanData.status = isActive ? 'ACTIVE' : 'INACTIVE';
+    }
+    
+    return client.user.create({
+      data: {
+        email: cleanData.email,
+        password: cleanData.password,
+        firstName: cleanData.firstName || 'Test',
+        lastName: cleanData.lastName || 'User',
+        role: cleanData.role || 'CONSUMER',
+        status: cleanData.status || 'ACTIVE',
+        ...cleanData
+      }
+    });
   }
 
-  /**
-   * Create component helper
-   */
   async createComponent(data: any): Promise<any> {
     const client = this.getClient();
-    return client.component.create({ data });
+    
+    if (!data.name) {
+      throw new Error('Component name is required');
+    }
+    if (!data.version) {
+      data.version = '1.0.0';
+    }
+    if (!data.createdById) {
+      throw new Error('Component createdById is required');
+    }
+
+    return client.component.create({
+      data: {
+        name: data.name,
+        version: data.version,
+        type: data.type || 'UI_COMPONENT',
+        lifecycle: data.lifecycle || 'DEVELOPMENT',
+        description: data.description || 'Test component',
+        author: data.author || 'Test Author',
+        license: data.license || 'MIT',
+        keywords: data.keywords || ['test'],
+        metadata: data.metadata || {},
+        createdById: data.createdById,
+        ...data
+      }
+    });
   }
 
-  /**
-   * Create contract helper
-   */
   async createContract(data: any): Promise<any> {
     const client = this.getClient();
-    return client.contract.create({ data });
+    
+    if (!data.name) {
+      throw new Error('Contract name is required');
+    }
+    if (!data.version) {
+      throw new Error('Contract version is required');
+    }
+    if (!data.createdById) {
+      throw new Error('Contract createdById is required');
+    }
+
+    return client.contract.create({ 
+      data: {
+        ...data,
+        schemaVersion: data.schemaVersion || '1.0.0',
+        description: data.description || 'Test contract',
+        author: data.author || 'Test Author',
+        keywords: data.keywords || ['test'],
+        schemaProps: data.schemaProps || {},
+        schemaEvents: data.schemaEvents || {},
+        schemaMethods: data.schemaMethods || {},
+        metadata: data.metadata || {}
+      }
+    });
   }
 
-  /**
-   * Create environment helper
-   */
   async createEnvironment(data: any): Promise<any> {
     const client = this.getClient();
-    return client.environment.create({ data });
+    
+    if (!data.name) {
+      throw new Error('Environment name is required');
+    }
+    if (!data.version) {
+      data.version = '1.0.0';
+    }
+    if (!data.createdById) {
+      throw new Error('Environment createdById is required');
+    }
+
+    return client.environment.create({
+      data: {
+        name: data.name,
+        version: data.version,
+        status: data.status || 'ACTIVE',
+        health: data.health || 'HEALTHY',
+        description: data.description || 'Test environment',
+        provider: data.provider || 'test',
+        deploymentTarget: data.deploymentTarget || 'test',
+        deploymentConfig: data.deploymentConfig || {},
+        metadata: data.metadata || {},
+        createdById: data.createdById,
+        ...data
+      }
+    });
   }
 
-  /**
-   * Create audit log helper
-   */
   async createAuditLog(data: any): Promise<any> {
     const client = this.getClient();
-    return client.auditLog.create({ data });
+    // Ensure the AuditLog model exists in your schema
+    return (client as any).auditLog?.create({ data }) || null;
   }
 }
 
-// Export a factory function instead of singleton
-export const createTestDatabase = (suiteName?: string) => new TestDatabase(suiteName);
+// Factory function to create test database instances
+export const createTestDatabase = (suiteName?: string) => TestDatabase.getInstance();
 
 // Helper to create environments
 export async function createEnvironment(db: TestDatabase, data: any) {
-  const client = db.getClient();
-  return client.environment.create({ data });
+  return db.createEnvironment(data);
 }
 
 // Export for backward compatibility
-export const testDb = new TestDatabase('default');
+export const testDb = TestDatabase.getInstance();

@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import { Application } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { createServer } from '../../src/api/server';
-import { TestDatabase } from '../utils/database';
+import { PrismaClient } from '../../generated/prisma';
+import { setupIntegrationTest, teardownIntegrationTest, cleanTestDatabase } from './testSetup';
 import { ApiTestHelper } from '../utils/helpers';
 import { userFixtures } from '../fixtures/users';
 import { componentFixtures, createComponentFixture } from '../fixtures/components';
@@ -13,7 +12,7 @@ import { ContractService } from '../../src/api/services/ContractService';
 
 describe('Contract API Integration Tests', () => {
   let app: Application;
-  let testDb: TestDatabase;
+  let testDb: any;
   let apiHelper: ApiTestHelper;
   let prisma: PrismaClient;
   let componentService: ComponentService;
@@ -21,22 +20,22 @@ describe('Contract API Integration Tests', () => {
   let testComponents: any = {};
 
   beforeAll(async () => {
-    testDb = new TestDatabase();
-    await testDb.setup();
-    prisma = testDb.prisma;
+    const setup = await setupIntegrationTest('contracts');
+    app = setup.app;
+    testDb = setup.testDb;
+    prisma = setup.testClient;
 
-    app = createServer(prisma);
     apiHelper = new ApiTestHelper(app);
     componentService = new ComponentService(prisma);
     contractService = new ContractService(prisma);
-  });
+  }, 30000);
 
   afterAll(async () => {
-    await testDb.teardown();
+    await teardownIntegrationTest();
   });
 
   beforeEach(async () => {
-    await testDb.clean();
+    await cleanTestDatabase();
 
     // Create test users
     await apiHelper.createUser(userFixtures.owner);

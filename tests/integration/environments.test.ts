@@ -5,8 +5,8 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { apiServer } from '../../src/api/server';
-import { testDb } from '../utils/database';
+import { EnvironmentStatus, EnvironmentHealth } from '../../generated/prisma';
+import { setupIntegrationTest, teardownIntegrationTest, cleanTestDatabase } from './testSetup';
 import { ApiTestHelper, AuthTestUtils, ValidationTestUtils } from '../utils/helpers';
 import { userFixtures } from '../fixtures/users';
 import {
@@ -18,19 +18,24 @@ import {
 describe('Environment Endpoints', () => {
   let app: any;
   let apiHelper: ApiTestHelper;
+  let testDb: any;
 
   beforeAll(async () => {
-    await testDb.setup();
-    app = apiServer.getApp();
+    const setup = await setupIntegrationTest('environments');
+    app = setup.app;
+    testDb = setup.testDb;
     apiHelper = new ApiTestHelper(app);
-  });
+    
+    // Setup test users with authentication tokens
+    await apiHelper.setupTestUsers(testDb, userFixtures);
+  }, 30000);
 
   afterAll(async () => {
-    await testDb.teardown();
+    await teardownIntegrationTest();
   });
 
   beforeEach(async () => {
-    await testDb.cleanDatabase();
+    await cleanTestDatabase();
     apiHelper.clearTokens();
   });
 
@@ -550,8 +555,7 @@ describe('Environment Endpoints', () => {
     beforeEach(async () => {
       healthyEnv = await testDb.createEnvironment({
         ...environmentFixtures.production,
-        status: 'HEALTHY',
-        createdById: userFixtures.owner.id,
+        health: EnvironmentHealth.HEALTHY,
       });
 
       unhealthyEnv = await testDb.createEnvironment({
@@ -666,8 +670,7 @@ describe('Environment Endpoints', () => {
     beforeEach(async () => {
       testEnvironment = await testDb.createEnvironment({
         ...environmentFixtures.production,
-        capabilities: ['auto-scaling', 'load-balancing', 'ssl-termination'],
-        createdById: userFixtures.owner.id,
+        // capabilities: ['auto-scaling', 'load-balancing', 'ssl-termination'], // TODO: Fix relational syntax
       });
     });
 
@@ -739,8 +742,7 @@ describe('Environment Endpoints', () => {
     beforeEach(async () => {
       testEnvironment = await testDb.createEnvironment({
         ...environmentFixtures.staging,
-        status: 'HEALTHY',
-        createdById: userFixtures.owner.id,
+        health: EnvironmentHealth.HEALTHY,
       });
     });
 

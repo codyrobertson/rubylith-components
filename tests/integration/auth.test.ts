@@ -5,8 +5,7 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { apiServer } from '../../src/api/server';
-import { testDb } from '../utils/database';
+import { setupIntegrationTest, teardownIntegrationTest, cleanTestDatabase } from './testSetup';
 import { ApiTestHelper, AuthTestUtils, ValidationTestUtils } from '../utils/helpers';
 import {
   userFixtures,
@@ -19,19 +18,21 @@ import {
 describe('Authentication Endpoints', () => {
   let app: any;
   let apiHelper: ApiTestHelper;
+  let testDb: any;
 
   beforeAll(async () => {
-    await testDb.setup();
-    app = apiServer.getApp();
+    const setup = await setupIntegrationTest('auth');
+    app = setup.app;
+    testDb = setup.testDb;
     apiHelper = new ApiTestHelper(app);
-  });
+  }, 30000);
 
   afterAll(async () => {
-    await testDb.teardown();
+    await teardownIntegrationTest();
   });
 
   beforeEach(async () => {
-    await testDb.cleanDatabase();
+    await cleanTestDatabase();
     apiHelper.clearTokens();
   });
 
@@ -53,7 +54,7 @@ describe('Authentication Endpoints', () => {
       expect(user.email).toBe(userData.email.toLowerCase());
       expect(user.name).toBe(userData.name);
       expect(user.role).toBe('CONTRIBUTOR'); // Default role
-      expect(user.isActive).toBe(true);
+      expect(user.status).toBe('ACTIVE');
 
       expect(tokens).toHaveProperty('accessToken');
       expect(tokens).toHaveProperty('refreshToken');

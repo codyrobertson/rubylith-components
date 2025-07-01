@@ -23,7 +23,7 @@ export interface AuthUser {
   id: string;
   email: string;
   role: string;
-  isActive: boolean;
+  status: string;
 }
 
 export enum UserRole {
@@ -58,7 +58,7 @@ export const authMiddleware = async (
     const userRepo = RepositoryFactory.getUserRepository();
     const user = await userRepo.findById(decoded.userId);
     
-    if (!user || !user.isActive) {
+    if (!user || user.status !== 'ACTIVE') {
       throw errors.unauthorized('User account not found or inactive');
     }
     
@@ -67,7 +67,7 @@ export const authMiddleware = async (
       id: user.id,
       email: user.email,
       role: user.role,
-      isActive: user.isActive,
+      status: user.status,
     };
     req.token = token;
     
@@ -183,7 +183,7 @@ export const apiKeyAuth = async (
     id: 'api-key-user',
     email: 'api@system',
     role: UserRole.CONSUMER,
-    isActive: true,
+    status: 'ACTIVE',
   };
   
   next();

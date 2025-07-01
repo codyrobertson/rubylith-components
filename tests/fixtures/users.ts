@@ -11,7 +11,7 @@ export interface UserFixture {
   firstName: string;
   lastName: string;
   role: 'OWNER' | 'MAINTAINER' | 'CONTRIBUTOR' | 'CONSUMER' | 'AUDITOR';
-  isActive: boolean;
+  status: 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'PENDING';
 }
 
 export interface UserLoginFixture {
@@ -35,7 +35,7 @@ export const userFixtures: Record<string, UserFixture> = {
     firstName: 'Test',
     lastName: 'Owner',
     role: 'OWNER',
-    isActive: true,
+    status: 'ACTIVE',
   },
   
   maintainer: {
@@ -44,7 +44,7 @@ export const userFixtures: Record<string, UserFixture> = {
     firstName: 'Test',
     lastName: 'Maintainer',
     role: 'MAINTAINER',
-    isActive: true,
+    status: 'ACTIVE',
   },
   
   contributor: {
@@ -53,7 +53,7 @@ export const userFixtures: Record<string, UserFixture> = {
     firstName: 'Test',
     lastName: 'Contributor',
     role: 'CONTRIBUTOR',
-    isActive: true,
+    status: 'ACTIVE',
   },
   
   consumer: {
@@ -62,7 +62,7 @@ export const userFixtures: Record<string, UserFixture> = {
     firstName: 'Test',
     lastName: 'Consumer',
     role: 'CONSUMER',
-    isActive: true,
+    status: 'ACTIVE',
   },
   
   auditor: {
@@ -71,7 +71,7 @@ export const userFixtures: Record<string, UserFixture> = {
     firstName: 'Test',
     lastName: 'Auditor',
     role: 'AUDITOR',
-    isActive: true,
+    status: 'ACTIVE',
   },
   
   inactiveUser: {
@@ -80,7 +80,7 @@ export const userFixtures: Record<string, UserFixture> = {
     firstName: 'Inactive',
     lastName: 'User',
     role: 'CONTRIBUTOR',
-    isActive: false,
+    status: 'INACTIVE',
   },
 };
 
@@ -234,14 +234,14 @@ export const userUpdateFixtures = {
   },
   
   statusUpdate: {
-    isActive: false,
+    status: 'INACTIVE',
   },
   
   fullUpdate: {
     firstName: 'Completely',
     lastName: 'Updated',
     role: 'AUDITOR',
-    isActive: true,
+    status: 'ACTIVE',
   },
   
   emptyUpdate: {},
@@ -253,9 +253,24 @@ export const userUpdateFixtures = {
   invalidType: {
     firstName: 123,
     lastName: true,
-    isActive: 'not-boolean',
+    status: 'INVALID',
   },
 };
+
+/**
+ * Factory function for creating user test data
+ */
+export function createUserFixture(overrides: Partial<UserFixture> = {}): UserFixture {
+  return {
+    email: `test${Math.random().toString(36).substring(2, 8)}@example.com`,
+    password: 'SecurePassword123!',
+    firstName: 'Test',
+    lastName: 'User',
+    role: 'CONTRIBUTOR',
+    status: 'ACTIVE',
+    ...overrides,
+  };
+}
 
 /**
  * Factory functions for generating dynamic test data
@@ -271,7 +286,7 @@ export class UserFixtureFactory {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       role: 'CONTRIBUTOR',
-      isActive: true,
+      status: 'ACTIVE',
       ...overrides,
     };
   }

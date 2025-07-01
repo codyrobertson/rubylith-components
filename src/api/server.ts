@@ -21,8 +21,10 @@ import { specs } from './docs/swagger';
 export class ApiServer {
   private app: Express;
   private server: ReturnType<Express['listen']> | null = null;
+  private prismaClient?: any;
 
-  constructor() {
+  constructor(prismaClient?: any) {
+    this.prismaClient = prismaClient;
     this.app = express();
     this.setupMiddleware();
     this.setupRoutes();
@@ -164,6 +166,6 @@ export const apiServer = new ApiServer();
 
 // Export function to create server for testing
 export function createServer(prismaClient?: any): Express {
-  const server = new ApiServer();
+  const server = new ApiServer(prismaClient);
   return server.getApp();
 }

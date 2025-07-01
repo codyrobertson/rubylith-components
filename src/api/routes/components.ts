@@ -27,7 +27,7 @@ const createComponentSchema = z.object({
   homepage: z.string().url().optional(),
   repository: z.string().url().optional(),
   keywords: z.array(z.string()),
-  contractId: z.string(),
+  contractId: z.string().optional(),
   metadata: z.record(z.any()).optional(),
 });
 
@@ -130,7 +130,15 @@ const createComponent = async (req: Request, res: Response, next: NextFunction) 
       throw errors.conflict(`Component ${body.name}@${body.version} already exists`);
     }
 
-    const component = await repo.create(body as Parameters<typeof repo.create>[0]);
+    // Create component with user relationship
+    const componentData = {
+      ...body,
+      createdBy: {
+        connect: { id: req.user?.id }
+      }
+    };
+
+    const component = await repo.create(componentData as Parameters<typeof repo.create>[0]);
     
     res.status(201).json({ data: component });
   } catch (error) {

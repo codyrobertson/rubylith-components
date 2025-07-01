@@ -25,21 +25,21 @@ const createUserSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   role: z.nativeEnum(UserRole),
-  isActive: z.boolean().default(true),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'DELETED', 'PENDING']).default('ACTIVE'),
 });
 
 const updateUserSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   role: z.nativeEnum(UserRole).optional(),
-  isActive: z.boolean().optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'DELETED', 'PENDING']).optional(),
 });
 
 const queryUsersSchema = z.object({
   limit: z.string().regex(/^\d+$/).transform(Number).optional(),
   offset: z.string().regex(/^\d+$/).transform(Number).optional(),
   role: z.nativeEnum(UserRole).optional(),
-  isActive: z.string().transform(val => val === 'true').optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'DELETED', 'PENDING']).optional(),
   search: z.string().optional(),
 });
 
@@ -50,11 +50,11 @@ const userParamsSchema = z.object({
 // Route handlers
 const listUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { limit = 50, offset = 0, role, isActive, search }: {
+    const { limit = 50, offset = 0, role, status, search }: {
       limit?: number;
       offset?: number;
       role?: UserRole;
-      isActive?: boolean;
+      status?: string;
       search?: string;
     } = req.query;
 
@@ -77,8 +77,8 @@ const listUsers = async (req: Request, res: Response, next: NextFunction) => {
     if (role !== undefined) {
       users = users.filter(user => user.role === role);
     }
-    if (isActive !== undefined) {
-      users = users.filter(user => user.isActive === isActive);
+    if (status !== undefined) {
+      users = users.filter(user => user.status === status);
     }
 
     // Apply pagination
@@ -124,13 +124,13 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, firstName, lastName, role, isActive }: {
+    const { email, password, firstName, lastName, role, status }: {
       email: string;
       password: string;
       firstName?: string;
       lastName?: string;
       role: UserRole;
-      isActive: boolean;
+      status: string;
     } = req.body;
 
     // Only OWNER can create other OWNER accounts
@@ -162,7 +162,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       firstName: firstName ?? null,
       lastName: lastName ?? null,
       role,
-      isActive,
+      status,
     });
 
     // Remove password from response
@@ -177,11 +177,11 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, role, isActive }: {
+    const { firstName, lastName, role, status }: {
       firstName?: string;
       lastName?: string;
       role?: UserRole;
-      isActive?: boolean;
+      status?: string;
     } = req.body;
 
     const userRepo = RepositoryFactory.getUserRepository();
@@ -198,7 +198,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // Prevent users from deactivating themselves
-    if (id === req.user!.id && isActive === false) {
+    if (id === req.user!.id && status === 'INACTIVE') {
       throw errors.badRequest('Cannot deactivate your own account');
     }
 
@@ -207,7 +207,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
       firstName: firstName ?? undefined,
       lastName: lastName ?? undefined,
       role: role ?? undefined,
-      isActive: isActive ?? undefined,
+      status: status ?? undefined,
     });
 
     // Remove password from response

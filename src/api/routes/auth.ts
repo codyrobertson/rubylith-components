@@ -21,8 +21,7 @@ const router = Router();
 const registerSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
 });
 
 const loginSchema = z.object({
@@ -44,12 +43,16 @@ const refreshTokenSchema = z.object({
  */
 router.post('/register', validateRequest({ body: registerSchema }), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, firstName, lastName }: {
+    const { email, password, name }: {
       email: string;
       password: string;
-      firstName?: string;
-      lastName?: string;
+      name: string;
     } = req.body;
+    
+    // Split name into firstName and lastName
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
     
     // Validate password strength
     const passwordValidation = PasswordService.validatePasswordStrength(password);
@@ -82,7 +85,7 @@ router.post('/register', validateRequest({ body: registerSchema }), async (req: 
       firstName: firstName ?? null,
       lastName: lastName ?? null,
       role: 'CONSUMER', // Default role
-      isActive: true,
+      status: 'ACTIVE',
     });
     
     // Generate tokens
@@ -90,17 +93,20 @@ router.post('/register', validateRequest({ body: registerSchema }), async (req: 
     
     // Return success response (exclude password)
     res.status(201).json({
-      message: 'User registered successfully',
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-      },
-      tokens,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+        tokens,
+      }
     });
   } catch (error) {
     next(error);
@@ -124,7 +130,7 @@ router.post('/login', validateRequest({ body: loginSchema }), async (req: Reques
     }
     
     // Check if user is active
-    if (!user.isActive) {
+    if (user.status !== 'ACTIVE') {
       res.status(403).json({
         error: 'Account is inactive. Please contact support.',
       });
@@ -145,17 +151,21 @@ router.post('/login', validateRequest({ body: loginSchema }), async (req: Reques
     
     // Return success response (exclude password)
     res.json({
-      message: 'Login successful',
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        isActive: user.isActive,
-        lastLoginAt: new Date(),
-      },
-      tokens,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          role: user.role,
+          status: user.status,
+          lastLoginAt: new Date(),
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+        tokens,
+      }
     });
   } catch (error) {
     if (error instanceof InvalidCredentialsError) {
@@ -181,7 +191,7 @@ router.post('/refresh', validateRequest({ body: refreshTokenSchema }), async (re
     const userRepo = RepositoryFactory.getUserRepository();
     const user = await userRepo.findById(decoded.userId);
     
-    if (!user || !user.isActive) {
+    if (!user || user.status !== 'ACTIVE') {
       res.status(401).json({
         error: 'User account not found or inactive',
       });
@@ -196,11 +206,13 @@ router.post('/refresh', validateRequest({ body: refreshTokenSchema }), async (re
     });
     
     res.json({
-      message: 'Token refreshed successfully',
-      accessToken: newAccessToken,
+      data: {
+        accessToken: newAccessToken,
+        expiresIn: 3600 // 1 hour in seconds
+      }
     });
   } catch (error) {
-    next(errors.unauthorized('Invalid or expired refresh token'));
+    next(errors.unauthorized('Invalid refresh token'));
   }
 });
 
@@ -212,7 +224,7 @@ router.post('/logout', authMiddleware, (_req: Request, res: Response) => {
   // In a JWT system, logout is typically handled client-side by removing tokens
   // This endpoint exists for completeness and future token blacklisting
   res.json({
-    message: 'Logout successful',
+    message: 'Logged out successfully',
   });
 });
 
@@ -238,7 +250,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response, next: Next
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
-        isActive: user.isActive,
+        status: user.status,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -295,7 +307,7 @@ router.put('/me', authMiddleware, validateRequest({
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         role: updatedUser.role,
-        isActive: updatedUser.isActive,
+        status: updatedUser.status,
         lastLoginAt: updatedUser.lastLoginAt,
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt,

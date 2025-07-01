@@ -10,13 +10,16 @@ export interface ComponentFixture {
   version: string;
   description: string;
   author: string;
-  keywords: string[];
-  contractId: string;
-  sourceCode: string;
-  buildArtifacts: Record<string, any>;
-  type: 'COMPONENT' | 'TEMPLATE' | 'LAYOUT' | 'UTILITY';
-  lifecycle: 'EXPERIMENTAL' | 'ALPHA' | 'BETA' | 'STABLE' | 'DEPRECATED';
-  metadata: Record<string, any>;
+  license: string;
+  keywords: any[];
+  type: 'UI_COMPONENT' | 'LAYOUT_COMPONENT' | 'DATA_COMPONENT' | 'NAV_COMPONENT' | 'FORM_COMPONENT' | 'UTILITY_COMPONENT' | 'INTEGRATION_COMPONENT';
+  lifecycle: 'DEVELOPMENT' | 'ALPHA' | 'BETA' | 'STABLE' | 'DEPRECATED' | 'ARCHIVED';
+  metadata: any;
+  contractId?: string;
+  homepage?: string;
+  repository?: string;
+  bundleSizeMinified?: number;
+  bundleSizeGzipped?: number;
 }
 
 export interface ComponentCreateFixture {
@@ -24,10 +27,11 @@ export interface ComponentCreateFixture {
   version: string;
   description: string;
   author: string;
-  keywords: string[];
-  contractId: string;
-  sourceCode: string;
-  buildArtifacts?: Record<string, any>;
+  license: string;
+  keywords: any[];
+  type: 'UI_COMPONENT' | 'LAYOUT_COMPONENT' | 'DATA_COMPONENT' | 'NAV_COMPONENT' | 'FORM_COMPONENT' | 'UTILITY_COMPONENT' | 'INTEGRATION_COMPONENT';
+  lifecycle: 'DEVELOPMENT' | 'ALPHA' | 'BETA' | 'STABLE' | 'DEPRECATED' | 'ARCHIVED';
+  metadata: any;
 }
 
 export interface ComponentUpdateFixture {
@@ -46,36 +50,14 @@ export const componentFixtures: Record<string, ComponentFixture> = {
     version: '1.0.0',
     description: 'A reusable button component for UI interactions',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['button', 'ui', 'interactive', 'clickable'],
-    contractId: 'contract-button-1',
-    sourceCode: `import React from 'react';
-import { ButtonProps } from './types';
-
-export const TestButton: React.FC<ButtonProps> = ({ 
-  children, 
-  onClick, 
-  disabled = false,
-  variant = 'primary'
-}) => {
-  return (
-    <button 
-      onClick={onClick}
-      disabled={disabled}
-      className={\`btn btn-\${variant}\`}
-    >
-      {children}
-    </button>
-  );
-};`,
-    buildArtifacts: {
-      bundle: 'test-button.bundle.js',
-      styles: 'test-button.css',
-      types: 'test-button.d.ts',
-      size: 2458,
-      dependencies: ['react'],
-    },
-    type: 'COMPONENT',
+    type: 'UI_COMPONENT',
     lifecycle: 'STABLE',
+    homepage: 'https://example.com/button',
+    repository: 'https://github.com/test/button',
+    bundleSizeMinified: 2458,
+    bundleSizeGzipped: 1024,
     metadata: {
       category: 'Forms',
       accessibility: 'WCAG-AA',
@@ -88,6 +70,7 @@ export const TestButton: React.FC<ButtonProps> = ({
     version: '1.0.0',
     description: 'A reusable input component for form data collection',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['input', 'form', 'text', 'validation'],
     contractId: 'contract-input-1',
     sourceCode: `import React, { useState } from 'react';
@@ -118,7 +101,7 @@ export const TestInput: React.FC<InputProps> = ({
       size: 1834,
       dependencies: ['react'],
     },
-    type: 'COMPONENT',
+    type: 'UI_COMPONENT',
     lifecycle: 'STABLE',
     metadata: {
       category: 'Forms',
@@ -132,6 +115,7 @@ export const TestInput: React.FC<InputProps> = ({
     version: '2.0.0',
     description: 'A flexible modal dialog component',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['modal', 'dialog', 'overlay', 'popup'],
     contractId: 'contract-modal-1',
     sourceCode: `import React from 'react';
@@ -166,7 +150,7 @@ export const TestModal: React.FC<ModalProps> = ({
       size: 3241,
       dependencies: ['react', 'react-dom'],
     },
-    type: 'COMPONENT',
+    type: 'UI_COMPONENT',
     lifecycle: 'BETA',
     metadata: {
       category: 'Overlays',
@@ -180,6 +164,7 @@ export const TestModal: React.FC<ModalProps> = ({
     version: '1.2.1',
     description: 'A versatile card component for content display',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['card', 'container', 'content', 'layout'],
     contractId: 'contract-card-1',
     sourceCode: `import React from 'react';
@@ -206,7 +191,7 @@ export const TestCard: React.FC<CardProps> = ({
       size: 1967,
       dependencies: ['react'],
     },
-    type: 'COMPONENT',
+    type: 'UI_COMPONENT',
     lifecycle: 'STABLE',
     metadata: {
       category: 'Layout',
@@ -220,24 +205,11 @@ export const TestCard: React.FC<CardProps> = ({
     version: '0.1.0',
     description: 'An experimental widget component for testing new features',
     author: 'Research Team',
+    license: 'MIT',
     keywords: ['experimental', 'widget', 'research', 'prototype'],
     contractId: 'contract-experimental-1',
-    sourceCode: `import React from 'react';
-
-export const ExperimentalWidget: React.FC = () => {
-  return (
-    <div className="experimental-widget">
-      <p>This is an experimental component</p>
-    </div>
-  );
-};`,
-    buildArtifacts: {
-      bundle: 'experimental-widget.bundle.js',
-      size: 1024,
-      dependencies: ['react'],
-    },
-    type: 'COMPONENT',
-    lifecycle: 'EXPERIMENTAL',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
     metadata: {
       experimental: true,
       unstable: true,
@@ -254,10 +226,11 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: '1.0.0',
     description: 'A new button component',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['button', 'new'],
-    contractId: 'valid-contract-id',
-    sourceCode: 'export const NewButton = () => <button>New</button>;',
-    buildArtifacts: {},
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
   },
 
   validInput: {
@@ -265,9 +238,11 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: '1.0.0',
     description: 'A new input component',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['input', 'new'],
-    contractId: 'valid-contract-id',
-    sourceCode: 'export const NewInput = () => <input />;',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
   },
 
   duplicateName: {
@@ -275,9 +250,11 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: '2.0.0',
     description: 'Duplicate name component',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['duplicate'],
-    contractId: 'valid-contract-id',
-    sourceCode: 'export const DuplicateButton = () => <button>Duplicate</button>;',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
   },
 
   invalidContract: {
@@ -285,9 +262,11 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: '1.0.0',
     description: 'Component with invalid contract',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['invalid'],
-    contractId: 'non-existent-contract',
-    sourceCode: 'export const InvalidComponent = () => <div>Invalid</div>;',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
   },
 
   emptyName: {
@@ -295,9 +274,11 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: '1.0.0',
     description: 'Component with empty name',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['empty'],
-    contractId: 'valid-contract-id',
-    sourceCode: 'export const EmptyName = () => <div>Empty</div>;',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
   },
 
   invalidVersion: {
@@ -305,9 +286,11 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: 'not-semver',
     description: 'Component with invalid version',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['invalid'],
-    contractId: 'valid-contract-id',
-    sourceCode: 'export const InvalidVersion = () => <div>Invalid</div>;',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
   },
 
   missingSourceCode: {
@@ -315,9 +298,59 @@ export const componentCreateFixtures: Record<string, ComponentCreateFixture> = {
     version: '1.0.0',
     description: 'Component missing source code',
     author: 'Test Author',
+    license: 'MIT',
     keywords: ['missing'],
-    contractId: 'valid-contract-id',
-    sourceCode: '',
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
+  },
+
+  apiGateway: {
+    name: 'ApiGateway',
+    version: '1.0.0',
+    description: 'API Gateway service component',
+    author: 'Test Author',
+    license: 'MIT',
+    keywords: ['api', 'gateway', 'service', 'backend'],
+    type: 'INTEGRATION_COMPONENT',
+    lifecycle: 'STABLE',
+    metadata: {
+      category: 'Backend',
+      port: 8080,
+      protocol: 'HTTP',
+    },
+  },
+
+  authService: {
+    name: 'AuthService',
+    version: '1.2.0',
+    description: 'Authentication service component',
+    author: 'Test Author',
+    license: 'MIT',
+    keywords: ['auth', 'service', 'authentication', 'jwt'],
+    type: 'INTEGRATION_COMPONENT',
+    lifecycle: 'STABLE',
+    metadata: {
+      category: 'Security',
+      port: 8081,
+      protocol: 'HTTP',
+    },
+  },
+
+  database: {
+    name: 'Database',
+    version: '2.0.0',
+    description: 'Database connection component',
+    author: 'Test Author',
+    license: 'MIT',
+    keywords: ['database', 'storage', 'persistence', 'data'],
+    type: 'DATA_COMPONENT',
+    lifecycle: 'STABLE',
+    metadata: {
+      category: 'Storage',
+      type: 'PostgreSQL',
+      port: 5432,
+    },
   },
 };
 
@@ -364,6 +397,24 @@ export const UpdatedComponent = () => {
 };
 
 /**
+ * Factory function for creating component test data
+ */
+export function createComponentFixture(overrides: Partial<ComponentCreateFixture> = {}): ComponentCreateFixture {
+  return {
+    name: `TestComponent${Math.random().toString(36).substring(2, 8)}`,
+    version: '1.0.0',
+    description: 'Test component for integration tests',
+    author: 'Test Author',
+    license: 'MIT',
+    keywords: ['test', 'component'],
+    type: 'UI_COMPONENT',
+    lifecycle: 'DEVELOPMENT',
+    metadata: {},
+    ...overrides,
+  };
+}
+
+/**
  * Factory functions for generating dynamic component test data
  */
 export class ComponentFixtureFactory {
@@ -382,7 +433,7 @@ export class ComponentFixtureFactory {
       contractId: `contract-${faker.string.alphanumeric(8)}`,
       sourceCode: ComponentFixtureFactory.generateSourceCode(componentName),
       buildArtifacts: ComponentFixtureFactory.generateBuildArtifacts(),
-      type: 'COMPONENT',
+      type: 'UI_COMPONENT',
       lifecycle: 'STABLE',
       metadata: {},
       ...overrides,

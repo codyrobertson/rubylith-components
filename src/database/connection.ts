@@ -1,262 +1,131 @@
-/**
- * Database connection and configuration module
- * Provides Prisma client instance with connection pooling and error handling
- */
-
 import { PrismaClient } from '../../generated/prisma';
 
-// =============================================================================
-// Types
-// =============================================================================
-
-export interface DatabaseConfig {
-  url: string;
-  maxConnections?: number;
-  connectionTimeout?: number;
-  queryTimeout?: number;
-  retryAttempts?: number;
-  retryDelay?: number;
-}
-
-export interface ConnectionHealth {
-  isConnected: boolean;
-  latency?: number;
-  error?: string;
-  timestamp: Date;
-}
-
-// =============================================================================
-// Database Class
-// =============================================================================
-
-class Database {
-  private client: PrismaClient | null = null;
-  private config: DatabaseConfig;
-  private connectionPromise: Promise<PrismaClient> | null = null;
-  private isConnecting = false;
-  private retryCount = 0;
-
-  constructor(config?: Partial<DatabaseConfig>) {
-    this.config = {
-      url: process.env['DATABASE_URL'] || '',
-      maxConnections: 10,
-      connectionTimeout: 10000,
-      queryTimeout: 30000,
-      retryAttempts: 3,
-      retryDelay: 1000,
-      ...config,
-    };
-  }
-
-  /**
-   * Get the Prisma client instance with automatic connection management
-   */
-  async getClient(): Promise<PrismaClient> {
-    if (this.client) {
-      return this.client;
-    }
-
-    if (this.connectionPromise) {
-      return this.connectionPromise;
-    }
-
-    this.connectionPromise = this.connect();
-    return this.connectionPromise;
-  }
-
-  /**
-   * Establish database connection with retry logic
-   */
-  private async connect(): Promise<PrismaClient> {
-    if (this.isConnecting) {
-      throw new Error('Connection already in progress');
-    }
-
-    this.isConnecting = true;
-
-    try {
-      const client = new PrismaClient({
-        datasources: {
-          db: {
-            url: this.config.url,
-          },
-        },
-        log: [
-          { level: 'error', emit: 'stdout' },
-          { level: 'warn', emit: 'stdout' },
-        ],
-      });
-
-      // Test the connection
-      await client.$connect();
-
-      this.client = client;
-      this.isConnecting = false;
-      this.retryCount = 0;
-      this.connectionPromise = null;
-
-      if (process.env['NODE_ENV'] !== 'test') {
-        console.log('Database connection established successfully');
-      }
-      return client;
-    } catch (error) {
-      this.isConnecting = false;
-      this.connectionPromise = null;
-
-      if (this.retryCount < (this.config.retryAttempts || 3)) {
-        this.retryCount++;
-        if (process.env['NODE_ENV'] !== 'test') {
-          console.warn(
-            `Database connection failed, retrying (${this.retryCount}/${this.config.retryAttempts})...`
-          );
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, this.config.retryDelay || 1000));
-
-        return this.connect();
-      }
-
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(
-        `Failed to connect to database after ${this.config.retryAttempts} attempts: ${errorMessage}`
-      );
-    }
-  }
-
-  /**
-   * Disconnect from the database
-   */
-  async disconnect(): Promise<void> {
-    if (this.client) {
-      await this.client.$disconnect();
-      this.client = null;
-      this.connectionPromise = null;
-      if (process.env['NODE_ENV'] !== 'test') {
-        console.log('Database connection closed');
-      }
-    }
-  }
-
-  /**
-   * Check database connection health
-   */
-  async checkHealth(): Promise<ConnectionHealth> {
-    const startTime = Date.now();
-
-    try {
-      const client = await this.getClient();
-      await client.$queryRaw`SELECT 1 as result`;
-
-      return {
-        isConnected: true,
-        latency: Date.now() - startTime,
-        timestamp: new Date(),
-      };
-    } catch (error) {
-      return {
-        isConnected: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date(),
-      };
-    }
-  }
-
-  /**
-   * Execute a database transaction
-   */
-  async transaction<T>(
-    callback: (
-      tx: Omit<
-        PrismaClient,
-        '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
-      >
-    ) => Promise<T>
-  ): Promise<T> {
-    const client = await this.getClient();
-
-    return client.$transaction(callback);
-  }
-
-  /**
-   * Execute raw SQL query
-   */
-  async raw<T = unknown>(query: string, ...args: unknown[]): Promise<T> {
-    const client = await this.getClient();
-    return client.$queryRawUnsafe<T>(query, ...args);
-  }
-}
-
-// =============================================================================
-// Database Instance and Utilities
-// =============================================================================
-
-// Global database instance
-let databaseInstance: Database | null = null;
+let prisma: PrismaClient;
+let injectedClient: PrismaClient | null = null;
 
 /**
- * Get the global database instance
+ * Inject a custom PrismaClient instance (useful for testing)
  */
-export function getDatabase(config?: Partial<DatabaseConfig>): Database {
-  if (!databaseInstance) {
-    databaseInstance = new Database(config);
+export function injectPrismaClient(client: PrismaClient | null): void {
+  injectedClient = client;
+  if (client === null) {
+    // Reset the singleton when clearing injection
+    prisma = null as any;
   }
-  return databaseInstance;
 }
 
 /**
- * Get Prisma client from global database instance
+ * Returns a singleton instance of the PrismaClient.
+ * It initializes the client on the first call.
  */
-export async function getPrismaClient(): Promise<PrismaClient> {
-  const db = getDatabase();
-  return db.getClient();
+export function getPrismaClient(): PrismaClient {
+  // If a client was injected, use it
+  if (injectedClient) {
+    return injectedClient;
+  }
+  
+  if (!prisma) {
+    const isDatabaseTest = process.env.NODE_ENV === 'test';
+    const defaultUrl = isDatabaseTest ? 'file:./prisma/test.db' : 'file:./dev.db';
+    
+    prisma = new PrismaClient({
+      datasources: { 
+        db: { 
+          url: process.env.DATABASE_URL || defaultUrl
+        } 
+      },
+    });
+  }
+  return prisma;
 }
 
 /**
- * Initialize database connection (useful for app startup)
+ * Establishes the database connection.
  */
-export async function initializeDatabase(config?: Partial<DatabaseConfig>): Promise<void> {
-  const db = getDatabase(config);
-  await db.getClient();
+export async function initializeDatabase(): Promise<void> {
+  const client = getPrismaClient();
+  await client.$connect();
   if (process.env['NODE_ENV'] !== 'test') {
     console.log('Database initialized successfully');
   }
 }
 
 /**
- * Close database connection (useful for app shutdown)
+ * Closes the database connection.
  */
 export async function closeDatabase(): Promise<void> {
-  if (databaseInstance) {
-    await databaseInstance.disconnect();
-    databaseInstance = null;
+  if (prisma) {
+    await prisma.$disconnect();
   }
 }
 
-/**
- * Execute database transaction with global instance
- */
-export async function executeTransaction<T>(
-  callback: (
-    tx: Omit<
-      PrismaClient,
-      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
-    >
-  ) => Promise<T>
-): Promise<T> {
-  const db = getDatabase();
-  return db.transaction(callback);
+// Legacy Database class for backward compatibility
+export class Database {
+  private static connected = false;
+  private static instance: Database | null = null;
+
+  constructor(config?: any) {
+    // Accept config parameter for test compatibility
+  }
+
+  async getClient(): Promise<PrismaClient> {
+    if (!Database.connected) {
+      await initializeDatabase();
+      Database.connected = true;
+    }
+    return getPrismaClient();
+  }
+
+  async disconnect(): Promise<void> {
+    await closeDatabase();
+    Database.connected = false;
+  }
+
+  async checkHealth(): Promise<{ status: string; connection: string; latency?: number }> {
+    try {
+      const start = Date.now();
+      const client = await this.getClient();
+      await client.$queryRaw`SELECT 1`;
+      const latency = Date.now() - start;
+      return { status: 'healthy', connection: 'active', latency };
+    } catch (error) {
+      return { status: 'unhealthy', connection: 'error' };
+    }
+  }
+
+  async transaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+    const client = await this.getClient();
+    return client.$transaction(fn);
+  }
+
+  async raw<T = any>(query: string, values?: any[]): Promise<T> {
+    const client = await this.getClient();
+    return client.$queryRawUnsafe(query, ...(values || []));
+  }
+
+  async rawQuery<T = any>(query: string, values?: any[]): Promise<T> {
+    return this.raw<T>(query, values);
+  }
 }
 
-/**
- * Check database health
- */
-export async function checkDatabaseHealth(): Promise<ConnectionHealth> {
-  const db = getDatabase();
+// Export legacy functions for backward compatibility
+export async function runTransaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+  const db = new Database();
+  return db.transaction(fn);
+}
+
+export function getDatabase(config?: any) {
+  if (!Database.instance) {
+    Database.instance = new Database(config);
+  }
+  return Database.instance;
+}
+
+export async function checkDatabaseHealth() {
+  const db = new Database();
   return db.checkHealth();
 }
 
-// =============================================================================
-// Exports
-// =============================================================================
-
-export { Database };
+export async function executeTransaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+  return runTransaction(fn);
+}

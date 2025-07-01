@@ -224,7 +224,7 @@ export class AuthorizationError extends Error {
 
 export class InvalidCredentialsError extends AuthenticationError {
   constructor() {
-    super('Invalid email or password');
+    super('Invalid credentials');
   }
 }
 

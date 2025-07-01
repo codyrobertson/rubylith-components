@@ -5,6 +5,7 @@
 
 import request from 'supertest';
 import type { Express } from 'express';
+import { expect } from 'vitest';
 import { PasswordService, TokenService } from '../../src/api/utils/auth';
 import { testDb } from './database';
 
@@ -22,11 +23,17 @@ export class ApiTestHelper {
   /**
    * Make authenticated request
    */
-  authenticatedRequest(method: 'get' | 'post' | 'put' | 'patch' | 'delete', endpoint: string, userEmail?: string) {
+  authenticatedRequest(method: 'get' | 'post' | 'put' | 'patch' | 'delete', endpoint: string, user?: string | any) {
     const req = request(this.app)[method](endpoint);
     
-    if (userEmail && this.tokens.has(userEmail)) {
-      req.set('Authorization', `Bearer ${this.tokens.get(userEmail)}`);
+    if (user) {
+      // Handle both string email and user object
+      const userEmail = typeof user === 'string' ? user : user.email;
+      const token = this.tokens.get(userEmail) || user.accessToken;
+      
+      if (token) {
+        req.set('Authorization', `Bearer ${token}`);
+      }
     }
     
     return req;
@@ -80,6 +87,36 @@ export class ApiTestHelper {
   getToken(userEmail: string): string | undefined {
     return this.tokens.get(userEmail);
   }
+
+  /**
+   * Create a test user in the database and generate token
+   */
+  async createUser(userData: {
+    email: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+    role?: string;
+    status?: string;
+  }, testDb?: any) {
+    return AuthTestUtils.createTestUser(userData, testDb);
+  }
+
+  /**
+   * Setup test users from fixtures with tokens
+   */
+  async setupTestUsers(testDb: any, userFixtures: any): Promise<void> {
+    for (const [role, userData] of Object.entries(userFixtures)) {
+      // Create user in database
+      const user = await AuthTestUtils.createTestUserWithToken(testDb, userData as any);
+      
+      // Store token for authenticated requests
+      this.tokens.set(user.email, user.accessToken);
+      
+      // Update the fixture with the created user data
+      Object.assign(userFixtures[role], user);
+    }
+  }
 }
 
 /**
@@ -116,20 +153,49 @@ export class AuthTestUtils {
     firstName?: string;
     lastName?: string;
     role?: string;
-    isActive?: boolean;
+    status?: string;
+  }, testDatabase?: any) {
+    const hashedPassword = await AuthTestUtils.hashTestPassword(userData.password || 'password123');
+    
+    const db = testDatabase || testDb;
+    return db.createUser({
+      email: userData.email,
+      password: hashedPassword,
+      firstName: userData.firstName || 'Test',
+      lastName: userData.lastName || 'User',
+      role: userData.role as any || 'CONTRIBUTOR',
+      status: userData.status || 'ACTIVE',
+    });
+  }
+
+  /**
+   * Create test user with access token
+   */
+  static async createTestUserWithToken(testDb: any, userData: {
+    email: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+    role?: string;
+    status?: string;
   }) {
     const hashedPassword = await AuthTestUtils.hashTestPassword(userData.password || 'password123');
     
-    return testDb.getClient().user.create({
-      data: {
-        email: userData.email,
-        password: hashedPassword,
-        firstName: userData.firstName || 'Test',
-        lastName: userData.lastName || 'User',
-        role: userData.role as any || 'CONTRIBUTOR',
-        isActive: userData.isActive !== false,
-      },
+    const user = await testDb.createUser({
+      email: userData.email,
+      password: hashedPassword,
+      firstName: userData.firstName || 'Test',
+      lastName: userData.lastName || 'User',
+      role: userData.role as any || 'CONTRIBUTOR',
+      status: userData.status || 'ACTIVE',
     });
+    
+    const accessToken = await AuthTestUtils.generateTestToken(user.id, user.role);
+    
+    return {
+      ...user,
+      accessToken
+    };
   }
 }
 
@@ -192,7 +258,7 @@ export class ValidationTestUtils {
       'firstName',
       'lastName',
       'role',
-      'isActive',
+      'status',
       'createdAt',
       'updatedAt'
     ]);

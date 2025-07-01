@@ -13,7 +13,7 @@ import {
   RepositoryFactory,
 } from '../repositories';
 import { PrismaClient } from '../../../generated/prisma';
-import { testDb } from '../../../tests/utils/database';
+import { createTestDatabase } from '../../../tests/utils/database';
 import { userFixtures } from '../../../tests/fixtures/users';
 import { componentFixtures } from '../../../tests/fixtures/components';
 import { contractFixtures } from '../../../tests/fixtures/contracts';
@@ -25,12 +25,13 @@ const originalConsoleError = console.error;
 
 describe('Repository Classes', () => {
   let prismaClient: PrismaClient;
+  const testDb = createTestDatabase('repositories');
 
   beforeAll(async () => {
     console.error = vi.fn();
     await testDb.setup();
     prismaClient = testDb.getClient();
-  });
+  }, 30000);
 
   afterAll(async () => {
     console.error = originalConsoleError;
@@ -54,14 +55,14 @@ describe('Repository Classes', () => {
     }
 
     it('should get Prisma client instance', async () => {
-      const repo = new TestRepository();
+      const repo = new TestRepository(prismaClient);
       const client = await repo.testGetClient();
 
       expect(client).toBeInstanceOf(PrismaClient);
     });
 
     it('should handle Prisma known error codes', () => {
-      const repo = new TestRepository();
+      const repo = new TestRepository(prismaClient);
 
       // Test unique constraint violation
       const p2002Error = {
@@ -82,7 +83,7 @@ describe('Repository Classes', () => {
     });
 
     it('should handle generic errors', () => {
-      const repo = new TestRepository();
+      const repo = new TestRepository(prismaClient);
       const error = new Error('Generic error');
 
       expect(() => repo.testHandleError(error, 'operation')).toThrow(
@@ -91,7 +92,7 @@ describe('Repository Classes', () => {
     });
 
     it('should handle unknown errors', () => {
-      const repo = new TestRepository();
+      const repo = new TestRepository(prismaClient);
       const error = { unknown: 'error' };
 
       expect(() => repo.testHandleError(error, 'operation')).toThrow('Repository operation failed');
@@ -102,7 +103,7 @@ describe('Repository Classes', () => {
     let userRepo: UserRepository;
 
     beforeEach(() => {
-      userRepo = new UserRepository();
+      userRepo = new UserRepository(prismaClient);
     });
 
     describe('create', () => {
@@ -339,16 +340,16 @@ describe('Repository Classes', () => {
     let testUser: any;
 
     beforeEach(async () => {
-      componentRepo = new ComponentRepository();
+      componentRepo = new ComponentRepository(prismaClient);
 
       // Create test user
-      const userRepo = new UserRepository();
+      const userRepo = new UserRepository(prismaClient);
       testUser = await userRepo.create({
         email: 'component-test@example.com',
         password: 'password',
         firstName: 'Component',
         lastName: 'Tester',
-        role: 'DEVELOPER',
+        role: 'CONTRIBUTOR',
       });
     });
 
@@ -453,34 +454,37 @@ describe('Repository Classes', () => {
 
   describe('RepositoryFactory', () => {
     it('should create user repository', () => {
-      const repo = RepositoryFactory.createUserRepository();
+      const repo = RepositoryFactory.createUserRepository(prismaClient);
 
       expect(repo).toBeInstanceOf(UserRepository);
     });
 
     it('should create component repository', () => {
-      const repo = RepositoryFactory.createComponentRepository();
+      const repo = RepositoryFactory.createComponentRepository(prismaClient);
 
       expect(repo).toBeInstanceOf(ComponentRepository);
     });
 
     it('should create contract repository', () => {
-      const repo = RepositoryFactory.createContractRepository();
+      const repo = RepositoryFactory.createContractRepository(prismaClient);
 
       expect(repo).toBeInstanceOf(ContractRepository);
     });
 
     it('should create environment repository', () => {
-      const repo = RepositoryFactory.createEnvironmentRepository();
+      const repo = RepositoryFactory.createEnvironmentRepository(prismaClient);
 
       expect(repo).toBeInstanceOf(EnvironmentRepository);
     });
 
-    it('should return singleton instances', () => {
-      const repo1 = RepositoryFactory.createUserRepository();
-      const repo2 = RepositoryFactory.createUserRepository();
+    it('should return new instances when client is provided', () => {
+      const repo1 = RepositoryFactory.createUserRepository(prismaClient);
+      const repo2 = RepositoryFactory.createUserRepository(prismaClient);
 
-      expect(repo1).toBe(repo2);
+      // When a client is provided, factory returns new instances
+      expect(repo1).not.toBe(repo2);
+      expect(repo1).toBeInstanceOf(UserRepository);
+      expect(repo2).toBeInstanceOf(UserRepository);
     });
   });
 });

@@ -5,8 +5,7 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { apiServer } from '../../src/api/server';
-import { testDb } from '../utils/database';
+import { setupIntegrationTest, teardownIntegrationTest, cleanTestDatabase } from './testSetup';
 import { ApiTestHelper, AuthTestUtils } from '../utils/helpers';
 import { userFixtures, createUserFixture } from '../fixtures/users';
 import { componentFixtures } from '../fixtures/components';
@@ -16,19 +15,21 @@ import { environmentFixtures } from '../fixtures/environments';
 describe('Admin Endpoints', () => {
   let app: any;
   let apiHelper: ApiTestHelper;
+  let testDb: any;
 
   beforeAll(async () => {
-    await testDb.setup();
-    app = apiServer.getApp();
+    const setup = await setupIntegrationTest('admin');
+    app = setup.app;
+    testDb = setup.testDb;
     apiHelper = new ApiTestHelper(app);
-  });
+  }, 30000);
 
   afterAll(async () => {
-    await testDb.teardown();
+    await teardownIntegrationTest();
   });
 
   beforeEach(async () => {
-    await testDb.cleanDatabase();
+    await cleanTestDatabase();
     apiHelper.clearTokens();
   });
 

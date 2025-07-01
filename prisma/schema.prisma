@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 // =============================================================================
@@ -16,14 +16,20 @@ datasource db {
 // =============================================================================
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String   // hashed password
+  id          String     @id @default(cuid())
+  email       String     @unique
+  password    String     // hashed password
   firstName   String?
   lastName    String?
-  role        UserRole @default(CONSUMER)
-  isActive    Boolean  @default(true)
+  role        UserRole   @default(CONSUMER)
+  status      UserStatus @default(ACTIVE)
   lastLoginAt DateTime?
+  deletedAt   DateTime?
+  
+  // Relationships
+  components   Component[] @relation("ComponentCreatedBy")
+  contracts    Contract[]  @relation("ContractCreatedBy")
+  environments Environment[] @relation("EnvironmentCreatedBy")
   
   // Timestamps
   createdAt DateTime @default(now())
@@ -32,6 +38,7 @@ model User {
   // Indexes
   @@index([email])
   @@index([role])
+  @@index([status])
 }
 
 // =============================================================================
@@ -39,11 +46,12 @@ model User {
 // =============================================================================
 
 model Component {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   name        String
   version     String
   type        ComponentType
   lifecycle   ComponentLifecycle
+  status      ComponentStatus @default(DRAFT)
   
   // Metadata
   description String
@@ -58,8 +66,11 @@ model Component {
   bundleSizeGzipped  Int?
   
   // Foreign keys
-  contractId  String
-  contract    Contract @relation(fields: [contractId], references: [id])
+  contractId  String?
+  contract    Contract? @relation(fields: [contractId], references: [id])
+  
+  createdById String
+  createdBy   User   @relation("ComponentCreatedBy", fields: [createdById], references: [id])
   
   // Relationships
   dependencies ComponentDependency[] @relation("ComponentDependencies")
@@ -79,14 +90,17 @@ model Component {
   @@index([name])
   @@index([type])
   @@index([lifecycle])
+  @@index([status])
   @@index([contractId])
+  @@index([createdById])
 }
 
 model Contract {
-  id            String   @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String
   version       String
   schemaVersion String
+  status        ContractStatus @default(DRAFT)
   
   // Metadata
   description String
@@ -133,6 +147,10 @@ model Contract {
   compatibilityBreakingChanges  Json // String[]  
   compatibilityMigrationGuide   String?
   
+  // Foreign keys
+  createdById String
+  createdBy   User @relation("ContractCreatedBy", fields: [createdById], references: [id])
+  
   // Relationships
   components Component[]
   
@@ -147,6 +165,8 @@ model Contract {
   @@unique([name, version])
   @@index([name])
   @@index([schemaVersion])
+  @@index([status])
+  @@index([createdById])
 }
 
 model Environment {
@@ -172,6 +192,10 @@ model Environment {
   resourcesNetworkPolicy  Json?
   resourcesSecurityPolicy Json?
   
+  // Foreign keys
+  createdById String
+  createdBy   User @relation("EnvironmentCreatedBy", fields: [createdById], references: [id])
+  
   // Relationships
   capabilities Capability[]
   mountPlans   MountPlan[]
@@ -191,6 +215,7 @@ model Environment {
   @@index([status])
   @@index([health])
   @@index([provider])
+  @@index([createdById])
 }
 
 model Capability {
@@ -463,4 +488,25 @@ enum UserRole {
   CONTRIBUTOR
   CONSUMER
   AUDITOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+  PENDING
+}
+
+enum ComponentStatus {
+  DRAFT
+  ACTIVE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  DEPRECATED
+  ARCHIVED
 }

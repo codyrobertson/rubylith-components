@@ -11,8 +11,8 @@ export interface EnvironmentFixture {
   description: string;
   provider: string;
   region?: string;
-  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'MAINTENANCE';
-  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'MAINTENANCE';
+  status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ERROR';
+  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'UNKNOWN';
   deploymentTarget: string;
   deploymentConfig: Record<string, any>;
   resourcesMemoryLimit?: number;
@@ -29,8 +29,8 @@ export interface EnvironmentCreateFixture {
   description: string;
   provider: string;
   region?: string;
-  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'MAINTENANCE';
-  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'MAINTENANCE';
+  status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ERROR';
+  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'UNKNOWN';
   deploymentTarget: string;
   deploymentConfig: Record<string, any>;
   resourcesMemoryLimit?: number;
@@ -45,8 +45,8 @@ export interface EnvironmentUpdateFixture {
   description?: string;
   provider?: string;
   region?: string;
-  status?: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'MAINTENANCE';
-  health?: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'MAINTENANCE';
+  status?: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE' | 'ERROR';
+  health?: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' | 'UNKNOWN';
   deploymentTarget?: string;
   deploymentConfig?: Record<string, any>;
   resourcesMemoryLimit?: number;
@@ -65,7 +65,7 @@ export const environmentFixtures: Record<string, EnvironmentFixture> = {
     description: 'Production environment for stable component deployment',
     provider: 'aws',
     region: 'us-east-1',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'production',
     deploymentConfig: {
@@ -131,7 +131,7 @@ export const environmentFixtures: Record<string, EnvironmentFixture> = {
     description: 'Staging environment for pre-production testing',
     provider: 'aws',
     region: 'us-west-2',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'staging',
     deploymentConfig: {
@@ -182,7 +182,7 @@ export const environmentFixtures: Record<string, EnvironmentFixture> = {
     description: 'Development environment for component development and testing',
     provider: 'aws',
     region: 'us-west-1',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'development',
     deploymentConfig: {
@@ -228,7 +228,7 @@ export const environmentFixtures: Record<string, EnvironmentFixture> = {
     description: 'Dedicated testing environment for automated test execution',
     provider: 'gcp',
     region: 'us-central1',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'testing',
     deploymentConfig: {
@@ -296,7 +296,7 @@ export const environmentFixtures: Record<string, EnvironmentFixture> = {
     description: 'Environment experiencing performance issues',
     provider: 'azure',
     region: 'eastus',
-    status: 'DEGRADED',
+    status: 'ACTIVE',
     health: 'DEGRADED',
     deploymentTarget: 'production',
     deploymentConfig: {
@@ -326,7 +326,7 @@ export const environmentCreateFixtures: Record<string, EnvironmentCreateFixture>
     description: 'New production environment',
     provider: 'aws',
     region: 'us-east-1',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'production',
     deploymentConfig: {
@@ -345,7 +345,7 @@ export const environmentCreateFixtures: Record<string, EnvironmentCreateFixture>
     description: 'New staging environment',
     provider: 'gcp',
     region: 'us-central1',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'staging',
     deploymentConfig: {
@@ -359,7 +359,7 @@ export const environmentCreateFixtures: Record<string, EnvironmentCreateFixture>
     version: '2.0.0',
     description: 'Duplicate environment name',
     provider: 'aws',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'production',
     deploymentConfig: {},
@@ -371,7 +371,7 @@ export const environmentCreateFixtures: Record<string, EnvironmentCreateFixture>
     version: 'not-semver',
     description: 'Environment with invalid version',
     provider: 'aws',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'production',
     deploymentConfig: {},
@@ -395,7 +395,7 @@ export const environmentCreateFixtures: Record<string, EnvironmentCreateFixture>
     version: '1.0.0',
     description: 'Environment missing provider',
     provider: '',
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     deploymentTarget: 'production',
     deploymentConfig: {},
@@ -457,7 +457,7 @@ export const environmentUpdateFixtures: Record<string, EnvironmentUpdateFixture>
  */
 export const environmentHealthFixtures = {
   healthy: {
-    status: 'HEALTHY',
+    status: 'ACTIVE',
     health: 'HEALTHY',
     message: 'All systems operational',
     metrics: {
@@ -471,7 +471,7 @@ export const environmentHealthFixtures = {
   },
 
   degraded: {
-    status: 'DEGRADED',
+    status: 'ACTIVE',
     health: 'DEGRADED',
     message: 'Performance issues detected',
     metrics: {
@@ -485,7 +485,7 @@ export const environmentHealthFixtures = {
   },
 
   unhealthy: {
-    status: 'UNHEALTHY',
+    status: 'ERROR',
     health: 'UNHEALTHY',
     message: 'Critical issues detected',
     metrics: {
@@ -509,6 +509,13 @@ export const environmentHealthFixtures = {
 /**
  * Factory functions for generating dynamic environment test data
  */
+/**
+ * Create environment fixture helper function
+ */
+export const createEnvironmentFixture = (overrides: Partial<EnvironmentFixture> = {}): EnvironmentFixture => {
+  return EnvironmentFixtureFactory.generateEnvironment(overrides);
+};
+
 export class EnvironmentFixtureFactory {
   /**
    * Generate a random valid environment
@@ -522,7 +529,7 @@ export class EnvironmentFixtureFactory {
       description: faker.lorem.sentence(),
       provider: faker.helpers.arrayElement(['aws', 'gcp', 'azure', 'digital-ocean']),
       region: faker.helpers.arrayElement(['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1']),
-      status: 'HEALTHY',
+      status: 'ACTIVE',
       health: 'HEALTHY',
       deploymentTarget: faker.helpers.arrayElement(['production', 'staging', 'development', 'testing']),
       deploymentConfig: EnvironmentFixtureFactory.generateDeploymentConfig(),
@@ -630,12 +637,12 @@ export class EnvironmentFixtureFactory {
    * Generate environments with different statuses
    */
   static generateEnvironmentsWithStatuses(): EnvironmentFixture[] {
-    const statuses: EnvironmentFixture['status'][] = ['HEALTHY', 'DEGRADED', 'UNHEALTHY', 'MAINTENANCE'];
+    const statuses: EnvironmentFixture['status'][] = ['ACTIVE', 'INACTIVE', 'MAINTENANCE', 'ERROR'];
     
     return statuses.map((status, index) => 
       EnvironmentFixtureFactory.generateEnvironment({
         status,
-        health: status,
+        health: status === 'ACTIVE' ? 'HEALTHY' : status === 'INACTIVE' ? 'DEGRADED' : status === 'ERROR' ? 'UNHEALTHY' : 'UNKNOWN',
         name: `${status.toLowerCase()}Environment${index + 1}`,
       })
     );

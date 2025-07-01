@@ -14,6 +14,27 @@ interface ValidationSchema {
   params?: AnyZodObject;
 }
 
+interface ValidationIssue {
+  path: (string | number)[];
+  message: string;
+}
+
+// Helper function to convert Zod issues to a keyed object
+const toErrorMap = (issues: ValidationIssue[]) => {
+  return issues.reduce<Record<string, string>>((acc, issue) => {
+    const path = issue.path
+      .map((seg: string | number, index: number) => {
+        if (typeof seg === 'number') {
+          return `[${seg}]`;
+        }
+        return index === 0 ? seg : `.${seg}`;
+      })
+      .join('')
+      .replace(/\.?\[(\d+)\]/g, '[$1]'); // Ensure "items[1]" style
+    return { ...acc, [path]: issue.message };
+  }, {});
+};
+
 export const validateRequest = (schema: ValidationSchema | AnyZodObject) => {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -46,12 +67,9 @@ export const validateRequest = (schema: ValidationSchema | AnyZodObject) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const formattedErrors = error.errors.map((err) => ({
-          path: err.path.join('.'),
-          message: err.message,
-        }));
+        const errorDetails = toErrorMap(error.errors);
 
-        next(errors.validation('Validation failed', formattedErrors));
+        next(errors.validation('Validation failed', errorDetails));
       } else {
         next(error);
       }

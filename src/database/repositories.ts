@@ -21,37 +21,35 @@ import type {
 
 export abstract class BaseRepository {
   protected client: PrismaClient | null = null;
+  private instanceClient: PrismaClient | null;
+
+  constructor(client?: PrismaClient) {
+    this.instanceClient = client || null;
+  }
 
   protected async getClient(): Promise<PrismaClient> {
+    if (this.instanceClient) {
+      return this.instanceClient;
+    }
     if (!this.client) {
-      this.client = await getPrismaClient();
+      this.client = getPrismaClient();
+      if (process.env.NODE_ENV === 'test') {
+        console.log('Repository using database URL:', process.env.DATABASE_URL);
+      }
     }
     return this.client;
   }
 
   protected handleError(error: unknown, operation: string): never {
-    // Handle Prisma-specific errors
-    if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as any;
-
-      if (prismaError.code === 'P2002') {
-        const target = prismaError.meta?.target;
-        const targetStr = Array.isArray(target) ? target.join(', ') : 'field';
-        throw new Error(`Unique constraint violation on ${targetStr}`);
-      }
-
-      if (prismaError.code === 'P2025') {
-        throw new Error('Record not found');
-      }
-    }
-
-    // Handle regular errors
+    // Log the error for debugging, but then re-throw the original error.
+    console.error(`Error in repository operation '${operation}':`, error);
     if (error instanceof Error) {
-      throw new Error(`Repository ${operation} failed: ${error.message}`);
+      // Enhance the original error message with more context
+      error.message = `Repository operation '${operation}' failed: ${error.message}`;
+      throw error;
     }
-
-    // Handle unknown errors
-    throw new Error(`Repository ${operation} failed`);
+    // If for some reason a non-Error was thrown, wrap it.
+    throw new Error(`Repository operation '${operation}' failed with a non-error value.`);
   }
 }
 
@@ -659,45 +657,88 @@ export class RepositoryFactory {
   private static capabilityRepo: CapabilityRepository | null = null;
   private static mountPlanRepo: MountPlanRepository | null = null;
 
-  static createUserRepository(): UserRepository {
+  static getUserRepository(client?: PrismaClient): UserRepository {
+    if (client) {
+      return new UserRepository(client);
+    }
     if (!this.userRepo) {
       this.userRepo = new UserRepository();
     }
     return this.userRepo;
   }
 
-  static createComponentRepository(): ComponentRepository {
+  static getComponentRepository(client?: PrismaClient): ComponentRepository {
+    if (client) {
+      return new ComponentRepository(client);
+    }
     if (!this.componentRepo) {
       this.componentRepo = new ComponentRepository();
     }
     return this.componentRepo;
   }
 
-  static createContractRepository(): ContractRepository {
+  static getContractRepository(client?: PrismaClient): ContractRepository {
+    if (client) {
+      return new ContractRepository(client);
+    }
     if (!this.contractRepo) {
       this.contractRepo = new ContractRepository();
     }
     return this.contractRepo;
   }
 
-  static createEnvironmentRepository(): EnvironmentRepository {
+  static getEnvironmentRepository(client?: PrismaClient): EnvironmentRepository {
+    if (client) {
+      return new EnvironmentRepository(client);
+    }
     if (!this.environmentRepo) {
       this.environmentRepo = new EnvironmentRepository();
     }
     return this.environmentRepo;
   }
 
-  static createCapabilityRepository(): CapabilityRepository {
+  static getCapabilityRepository(client?: PrismaClient): CapabilityRepository {
+    if (client) {
+      return new CapabilityRepository(client);
+    }
     if (!this.capabilityRepo) {
       this.capabilityRepo = new CapabilityRepository();
     }
     return this.capabilityRepo;
   }
 
-  static createMountPlanRepository(): MountPlanRepository {
+  static getMountPlanRepository(client?: PrismaClient): MountPlanRepository {
+    if (client) {
+      return new MountPlanRepository(client);
+    }
     if (!this.mountPlanRepo) {
       this.mountPlanRepo = new MountPlanRepository();
     }
     return this.mountPlanRepo;
+  }
+
+  // Aliases for test compatibility
+  static createUserRepository(client?: PrismaClient): UserRepository {
+    return this.getUserRepository(client);
+  }
+
+  static createComponentRepository(client?: PrismaClient): ComponentRepository {
+    return this.getComponentRepository(client);
+  }
+
+  static createContractRepository(client?: PrismaClient): ContractRepository {
+    return this.getContractRepository(client);
+  }
+
+  static createEnvironmentRepository(client?: PrismaClient): EnvironmentRepository {
+    return this.getEnvironmentRepository(client);
+  }
+
+  static createCapabilityRepository(client?: PrismaClient): CapabilityRepository {
+    return this.getCapabilityRepository(client);
+  }
+
+  static createMountPlanRepository(client?: PrismaClient): MountPlanRepository {
+    return this.getMountPlanRepository(client);
   }
 }
